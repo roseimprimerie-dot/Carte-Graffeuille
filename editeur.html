@@ -7,9 +7,7 @@
 <meta name="description" content="Atelier des cartes de visite GRAFFEUILLE : format 54 × 85 mm, QR pointant vers la carte en ligne, export PDF, SVG, PNG et .vcf.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap">
+<link rel="stylesheet" href="assets/css/fonts.css">
 <link rel="stylesheet" href="assets/css/app.css">
 <style id="print-page">@page { margin: 0; size: 54mm 85mm; }</style>
 </head>
@@ -43,9 +41,16 @@
             <input type="text" id="lastName" name="lastName" placeholder="GOUMARD">
             <span class="hint">Affiché en capitales sur la carte.</span>
           </div>
-          <div class="field full">
+          <div class="field">
             <label for="role">Fonction</label>
-            <input type="text" id="role" name="role" placeholder="Directeur Adjoint">
+            <input type="text" id="role" name="role" placeholder="Responsable commercial">
+            <span class="hint">Se coupe sur deux lignes si elle est trop longue.</span>
+          </div>
+          <div class="field">
+            <label for="department">Service ou spécialité</label>
+            <input type="text" id="department" name="department" placeholder="Boîtes de vitesses / Ponts">
+            <span class="hint">Facultatif. S’imprime un cran plus petit sous la
+              fonction, comme sur les cartes existantes.</span>
           </div>
         </div>
       </div>
@@ -62,6 +67,12 @@
           <div class="field">
             <label for="email">Courriel</label>
             <input type="email" id="email" name="email" placeholder="prenom@graffeuille.com">
+          </div>
+          <div class="field full">
+            <label for="email2">Second courriel</label>
+            <input type="email" id="email2" name="email2" placeholder="service@graffeuille.com">
+            <span class="hint">Facultatif. Occupe une ligne de plus au verso ; si
+              elle est longue, les trois lignes se resserrent automatiquement.</span>
           </div>
           <div class="field full">
             <label for="website">Site internet</label>
@@ -136,11 +147,19 @@
               À renseigner avant d’imprimer : le QR pointe vers cette adresse.</span>
           </div>
           <div class="field full">
-            <label for="slug">Identifiant court</label>
-            <input type="text" id="slug" name="slug" placeholder="jerome-goumard">
-            <span class="hint">Donne une URL courte, donc un QR bien plus lisible.
-              Demande de déposer la fiche dans le dossier <code>cartes/</code> du site.
-              Laisser vide pour que le QR porte lui-même les coordonnées.</span>
+            <label for="slug">Identifiant de la personne</label>
+            <input type="text" id="slug" name="slug" placeholder="prenom-nom">
+            <span class="hint">Donne à la personne son adresse propre,
+              <code>…/equipe/prenom-nom/</code> : une URL courte, donc un QR bien
+              plus lisible. Laisser vide pour que le QR porte lui-même les
+              coordonnées.</span>
+          </div>
+          <div class="field full">
+            <label for="photo">Photo du dossier</label>
+            <input type="text" id="photo" name="photo" placeholder="photo.jpg">
+            <span class="hint">Nom du fichier image déposé dans le dossier de la
+              personne. Elle apparaît sur la page en ligne seulement — la carte
+              imprimée n’en porte pas.</span>
           </div>
           <div class="field full">
             <p class="notice" id="qr-target"></p>

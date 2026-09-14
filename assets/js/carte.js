@@ -3,16 +3,22 @@
  * d'autre. Elle est ouverte depuis le QR code du dos de la carte imprimée,
  * donc presque toujours sur un téléphone.
  *
- * La personne à afficher vient du fragment d'URL :
- *   #jerome-goumard  → fiche cartes/jerome-goumard.json déposée sur le site
- *   #c=<données>     → coordonnées portées par l'URL elle-même
- *   (aucun fragment) → fiche par défaut
+ * La page est construite entièrement ici, à partir d'un gabarit vide. Les
+ * dossiers d'employés ne contiennent donc qu'un index.html de quelques lignes
+ * qui n'a jamais à être remis à jour quand la mise en page évolue.
+ *
+ * Deux façons de désigner la personne à afficher :
+ *   window.CARTE = { source: 'carte.json' }   dossier d'employé, adresse propre
+ *   fragment d'URL                            #identifiant, ou #c=<coordonnées>
  */
 (function () {
   'use strict';
 
   var DEFAULT_SLUG = 'jerome-goumard';
-  var $ = function (s) { return document.querySelector(s); };
+
+  // Emplacements où chercher la fiche d'un identifiant court. Le premier est
+  // l'organisation actuelle ; le second garde valides les QR déjà imprimés.
+  var LOOKUP = ['equipe/{slug}/carte.json', 'cartes/{slug}.json'];
 
   var CHEVRON = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" '
               + 'focusable="false"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" '
@@ -23,6 +29,30 @@
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
   }
+
+  /* ------------------------------------------------------------- structure */
+
+  function scaffold() {
+    var root = document.createElement('div');
+    root.innerHTML =
+        '<main class="sheet" id="card" hidden>'
+      +   '<header class="crest" id="crest"></header>'
+      +   '<section class="identity" id="identity"></section>'
+      +   '<nav class="links" id="links" aria-label="Coordonnées"></nav>'
+      +   '<div class="actions">'
+      +     '<a class="cta" id="btn-vcf" href="#">Ajouter à mes contacts</a>'
+      +     '<button type="button" class="secondary" id="btn-share">Partager cette carte</button>'
+      +   '</div>'
+      +   '<footer class="foot" id="foot"></footer>'
+      + '</main>'
+      + '<section class="sheet missing" id="missing" hidden>'
+      +   '<h1>Carte introuvable</h1><p id="missing-text"></p>'
+      + '</section>'
+      + '<div class="toast" id="toast" role="status" aria-live="polite"></div>';
+    while (root.firstChild) document.body.appendChild(root.firstChild);
+  }
+
+  var $ = function (s) { return document.querySelector(s); };
 
   /* ------------------------------------------------------------------ rendu */
 
@@ -42,9 +72,15 @@
   }
 
   function renderIdentity(d) {
+    var name = Contact.fullName(d);
     $('#identity').innerHTML =
-        '<h1 class="name">' + esc(Contact.fullName(d)) + '</h1>'
-      + (d.role ? '<p class="role">' + esc(d.role) + '</p>' : '');
+        (d.photoUrl
+          ? '<img class="portrait" src="' + esc(d.photoUrl) + '" alt="Portrait de '
+            + esc(name) + '" width="96" height="96" loading="eager">'
+          : '')
+      + '<h1 class="name">' + esc(name) + '</h1>'
+      + (d.role ? '<p class="role">' + esc(d.role) + '</p>' : '')
+      + (d.department ? '<p class="department">' + esc(d.department) + '</p>' : '');
   }
 
   function row(icon, label, value, href, attrs) {
@@ -60,17 +96,18 @@
     if (d.phone) {
       out.push(row('phone', 'Téléphone', d.phone, 'tel:' + d.phone.replace(/\s+/g, '')));
     }
-    if (d.email) {
-      out.push(row('mail', 'Courriel', d.email, 'mailto:' + d.email));
-    }
+    Contact.emails(d).forEach(function (address, i) {
+      out.push(row('mail', i === 0 ? 'Courriel' : 'Autre courriel',
+                   address, 'mailto:' + address));
+    });
     if (d.website) {
       out.push(row('globe', 'Site internet', d.website, Contact.websiteUrl(d),
                    ' target="_blank" rel="noopener"'));
     }
     var address = Contact.addressQuery(d);
     if (address) {
-      var lines = [d.street, Contact.cityLine(d)].filter(Boolean).join(', ');
-      out.push(row('pin', 'Adresse', lines,
+      out.push(row('pin', 'Adresse',
+                   [d.street, Contact.cityLine(d)].filter(Boolean).join(', '),
                    'https://www.google.com/maps/search/?api=1&query='
                      + encodeURIComponent(address),
                    ' target="_blank" rel="noopener"'));
@@ -100,6 +137,7 @@
     renderIdentity(d);
     renderLinks(d);
     renderFoot(d);
+    $('#card').classList.toggle('with-portrait', !!d.photoUrl);
     $('#card').hidden = false;
     $('#missing').hidden = true;
     wireActions(d);
@@ -122,14 +160,19 @@
     toastTimer = setTimeout(function () { el.classList.remove('show'); }, 2800);
   }
 
+  var shareHandler = null;
   function wireActions(d) {
     var vcf = $('#btn-vcf');
-    var blob = new Blob([Contact.vcard(d)], { type: 'text/vcard;charset=utf-8' });
-    var name = (Contact.slugify(Contact.fullName(d)) || 'contact') + '.vcf';
-    vcf.href = URL.createObjectURL(blob);
-    vcf.download = name;
+    if (vcf.dataset.url) URL.revokeObjectURL(vcf.dataset.url);
+    var url = URL.createObjectURL(new Blob([Contact.vcard(d)],
+                                           { type: 'text/vcard;charset=utf-8' }));
+    vcf.href = url;
+    vcf.dataset.url = url;
+    vcf.download = (Contact.slugify(Contact.fullName(d)) || 'contact') + '.vcf';
 
-    $('#btn-share').addEventListener('click', function () {
+    var share = $('#btn-share');
+    if (shareHandler) share.removeEventListener('click', shareHandler);
+    shareHandler = function () {
       var payload = {
         title: Contact.fullName(d),
         text: Contact.fullName(d) + (d.role ? ' — ' + d.role : ''),
@@ -138,43 +181,69 @@
       if (navigator.share) {
         navigator.share(payload).catch(function () { /* partage annulé */ });
       } else if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(location.href)
-          .then(function () { toast('Lien copié.'); },
-                function () { window.prompt('Lien de la carte :', location.href); });
+        navigator.clipboard.writeText(location.href).then(
+          function () { toast('Lien copié.'); },
+          function () { window.prompt('Lien de la carte :', location.href); });
       } else {
         window.prompt('Lien de la carte :', location.href);
       }
-    }, { once: false });
+    };
+    share.addEventListener('click', shareHandler);
   }
 
   /* ------------------------------------------------------------- chargement */
 
+  /** Charge une fiche et résout sa photo relativement au dossier de la fiche. */
+  function loadJson(path) {
+    return fetch(path, { cache: 'no-cache' }).then(function (r) {
+      if (!r.ok) throw new Error(r.status + ' sur ' + path);
+      return r.json();
+    }).then(function (json) {
+      var d = Contact.normalise(json);
+      if (d.photo) d.photoUrl = path.replace(/[^/]*$/, '') + d.photo;
+      return d;
+    });
+  }
+
+  /** Essaie chaque emplacement connu, dans l'ordre, pour un identifiant. */
   function loadSlug(slug) {
-    return fetch('cartes/' + slug + '.json', { cache: 'no-cache' })
-      .then(function (r) {
-        if (!r.ok) throw new Error('introuvable');
-        return r.json();
-      })
-      .then(function (json) { return Contact.normalise(json); });
+    var attempts = LOOKUP.map(function (tpl) { return tpl.replace('{slug}', slug); });
+    return attempts.reduce(function (chain, path) {
+      return chain.catch(function () { return loadJson(path); });
+    }, Promise.reject());
   }
 
   function start() {
-    var frag = Contact.readFragment(location.hash);
+    var configured = window.CARTE && window.CARTE.source;
+    if (configured) {
+      return loadJson(configured).then(render, function () {
+        showMissing('La fiche de ce dossier est absente ou illisible '
+          + '(' + configured + ').');
+      });
+    }
 
+    var frag = Contact.readFragment(location.hash);
     if (frag.kind === 'inline') return render(frag.data);
     if (frag.kind === 'invalid') {
       return showMissing('Ce lien est incomplet ou abîmé. Scannez de nouveau le '
         + 'QR code au dos de la carte.');
     }
 
-    var slug = frag.kind === 'slug' ? frag.slug : DEFAULT_SLUG;
-    loadSlug(slug).then(render, function () {
+    loadSlug(frag.kind === 'slug' ? frag.slug : DEFAULT_SLUG).then(render, function () {
       showMissing('Aucune carte ne correspond à ce lien. Vérifiez l’adresse ou '
         + 'scannez de nouveau le QR code au dos de la carte.');
     });
   }
 
-  window.addEventListener('hashchange', start);
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
-  else start();
+  function boot() {
+    scaffold();
+    start();
+    // Seules les pages pilotées par le fragment réagissent à sa modification.
+    if (!(window.CARTE && window.CARTE.source)) {
+      window.addEventListener('hashchange', start);
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
 }());

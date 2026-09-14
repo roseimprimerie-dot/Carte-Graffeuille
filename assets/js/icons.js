@@ -1,52 +1,67 @@
 /*!
- * icons.js — pictogrammes partagés par la carte imprimée et la page publique.
- * Chacun est décrit dans un carré de 1 × 1 : la définition est indépendante
- * de la taille de rendu.
+ * icons.js — pictogrammes de la carte.
+ *
+ * Les trois premiers sont les contours exacts extraits de la fonte d'icônes
+ * embarquée dans les fichiers d'impression fournis : un téléphone mobile, un
+ * avion en papier et une épingle. Ils sont exprimés dans le repère de la fonte
+ * (1024 unités par cadratin, axe y vers le haut, origine sur la ligne de base),
+ * ce qui permet de les poser exactement comme le fait le PDF d'origine.
+ *
+ * Le globe n'apparaît sur aucune carte fournie : il ne sert qu'à la ligne
+ * « site internet », facultative, et est redessiné dans le même repère.
  */
 window.Icons = (function () {
   'use strict';
 
-  var PATHS = {
-    phone: 'M0.29 0.04 C0.25 -0.02 0.17 -0.01 0.12 0.04 L0.05 0.12'
-         + 'C0.00 0.17 -0.01 0.25 0.02 0.32 C0.15 0.62 0.38 0.85 0.68 0.98'
-         + 'C0.75 1.01 0.83 1.00 0.88 0.95 L0.96 0.88 C1.01 0.83 1.02 0.75 0.96 0.71'
-         + 'L0.78 0.58 C0.73 0.54 0.66 0.55 0.62 0.60 L0.54 0.69'
-         + 'C0.40 0.60 0.28 0.48 0.19 0.34 L0.28 0.26 C0.33 0.22 0.34 0.15 0.30 0.10 Z',
-    mail:  'M0.02 0.18 C0.02 0.12 0.07 0.07 0.13 0.07 L0.87 0.07 C0.93 0.07 0.98 0.12 0.98 0.18'
-         + 'L0.98 0.22 L0.50 0.55 L0.02 0.22 Z M0.02 0.35 L0.46 0.66 C0.49 0.68 0.51 0.68 0.54 0.66'
-         + 'L0.98 0.35 L0.98 0.79 C0.98 0.85 0.93 0.90 0.87 0.90 L0.13 0.90 C0.07 0.90 0.02 0.85 0.02 0.79 Z',
-    pin:   'M0.50 0.02 C0.29 0.02 0.12 0.19 0.12 0.40 C0.12 0.66 0.42 0.94 0.46 0.97'
-         + 'C0.48 0.99 0.52 0.99 0.54 0.97 C0.58 0.94 0.88 0.66 0.88 0.40 C0.88 0.19 0.71 0.02 0.50 0.02 Z'
-         + 'M0.50 0.53 C0.43 0.53 0.37 0.47 0.37 0.40 C0.37 0.33 0.43 0.27 0.50 0.27'
-         + 'C0.57 0.27 0.63 0.33 0.63 0.40 C0.63 0.47 0.57 0.53 0.50 0.53 Z',
-    globe: 'M0.50 0.02 C0.23 0.02 0.02 0.23 0.02 0.50 C0.02 0.77 0.23 0.98 0.50 0.98'
-         + 'C0.77 0.98 0.98 0.77 0.98 0.50 C0.98 0.23 0.77 0.02 0.50 0.02 Z'
-         + 'M0.50 0.12 C0.60 0.12 0.70 0.28 0.73 0.45 L0.27 0.45 C0.30 0.28 0.40 0.12 0.50 0.12 Z'
-         + 'M0.50 0.88 C0.40 0.88 0.30 0.72 0.27 0.55 L0.73 0.55 C0.70 0.72 0.60 0.88 0.50 0.88 Z'
-         + 'M0.12 0.45 C0.14 0.30 0.24 0.18 0.37 0.14 C0.30 0.24 0.25 0.34 0.23 0.45 Z'
-         + 'M0.77 0.45 C0.75 0.34 0.70 0.24 0.63 0.14 C0.76 0.18 0.86 0.30 0.88 0.45 Z'
-         + 'M0.23 0.55 C0.25 0.66 0.30 0.76 0.37 0.86 C0.24 0.82 0.14 0.70 0.12 0.55 Z'
-         + 'M0.88 0.55 C0.86 0.70 0.76 0.82 0.63 0.86 C0.70 0.76 0.75 0.66 0.77 0.55 Z',
-    card:  'M0.04 0.20 C0.04 0.14 0.09 0.09 0.15 0.09 L0.85 0.09 C0.91 0.09 0.96 0.14 0.96 0.20'
-         + 'L0.96 0.80 C0.96 0.86 0.91 0.91 0.85 0.91 L0.15 0.91 C0.09 0.91 0.04 0.86 0.04 0.80 Z'
-         + 'M0.15 0.20 L0.15 0.80 L0.85 0.80 L0.85 0.20 Z'
-         + 'M0.24 0.31 L0.47 0.31 L0.47 0.38 L0.24 0.38 Z'
-         + 'M0.24 0.46 L0.76 0.46 L0.76 0.53 L0.24 0.53 Z'
-         + 'M0.24 0.61 L0.63 0.61 L0.63 0.68 L0.24 0.68 Z'
+  var UPEM = 1024;
+
+  var GLYPHS = {
+    phone: { d: 'M352.0 768.0Q313.0 768.0 284.5 739.5Q256.0 711.0 256.0 672.0V96.0Q256.0 57.0 284.5 28.5Q313.0 0.0 352.0 0.0H672.0Q711.0 0.0 739.5 28.5Q768.0 57.0 768.0 96.0V672.0Q768.0 711.0 739.5 739.5Q711.0 768.0 672.0 768.0ZM352.0 704.0H672.0Q685.0 704.0 694.5 694.5Q704.0 685.0 704.0 672.0V96.0Q704.0 83.0 694.5 73.5Q685.0 64.0 672.0 64.0H352.0Q339.0 64.0 329.5 73.5Q320.0 83.0 320.0 96.0V672.0Q320.0 685.0 329.5 694.5Q339.0 704.0 352.0 704.0ZM512.0 160.0Q499.0 160.0 489.5 150.5Q480.0 141.0 480.0 128.0Q480.0 115.0 489.5 105.5Q499.0 96.0 512.0 96.0Q525.0 96.0 534.5 105.5Q544.0 115.0 544.0 128.0Q544.0 141.0 534.5 150.5Q525.0 160.0 512.0 160.0Z',
+            box: [256, 0, 768, 768] },
+    mail: { d: 'M115.0 725.0 129.0 665.0 191.0 384.0 129.0 103.0 115.0 43.0 949.0 384.0 172.0 702.0ZM204.0 619.0 701.0 416.0H249.0ZM249.0 352.0H701.0L204.0 149.0Z',
+            box: [115, 43, 949, 725] },
+    pin: { d: 'M512.0 800.0Q434.0 800.0 367.0 761.0Q302.0 722.0 263.0 657.0Q224.0 590.0 224.0 512.0Q224.0 481.0 236.0 440.0Q246.0 406.0 267.0 359.0Q301.0 282.0 356.0 187.0Q396.0 117.0 445.0 43.0Q470.0 5.0 486.0 -18.0L512.0 -56.0L579.0 43.0Q628.0 117.0 668.0 187.0Q723.0 282.0 757.0 359.0Q778.0 406.0 788.0 440.0Q800.0 481.0 800.0 512.0Q800.0 590.0 761.0 657.0Q722.0 722.0 657.0 761.0Q590.0 800.0 512.0 800.0ZM512.0 736.0Q573.0 736.0 624.5 706.0Q676.0 676.0 706.0 624.5Q736.0 573.0 736.0 512.0Q736.0 493.0 726.0 458.5Q716.0 424.0 699.0 385.0Q670.0 319.0 612.0 219.0Q563.0 135.0 514.0 61.0L512.0 59.0L510.0 61.0Q461.0 135.0 412.0 219.0Q354.0 319.0 325.0 385.0Q308.0 424.0 298.0 458.5Q288.0 493.0 288.0 512.0Q288.0 573.0 318.0 624.5Q348.0 676.0 399.5 706.0Q451.0 736.0 512.0 736.0ZM512.0 576.0Q485.0 576.0 466.5 557.5Q448.0 539.0 448.0 512.0Q448.0 485.0 466.5 466.5Q485.0 448.0 512.0 448.0Q539.0 448.0 557.5 466.5Q576.0 485.0 576.0 512.0Q576.0 539.0 557.5 557.5Q539.0 576.0 512.0 576.0Z',
+            box: [224, -56, 800, 800] },
+    globe: { d: 'M512 160a352 352 0 1 0 0 704 352 352 0 1 0 0-704Z'
+                  + 'M512 160c-97 0-176 158-176 352s79 352 176 352 176-158 176-352-79-352-176-352Z'
+                  + 'M184 384h656M184 640h656',
+             stroke: 64, box: [128, 128, 896, 896] }
   };
 
-  /** Groupe SVG positionné dans un repère quelconque (carte imprimée). */
-  function group(name, x, y, size, fill) {
-    return '<g transform="translate(' + x + ' ' + y + ') scale(' + size + ')">'
-         + '<path d="' + PATHS[name] + '" fill="' + fill + '"/></g>';
+  /**
+   * Les contours extraits de la fonte se remplissent ; le globe, redessiné,
+   * est un filet, pour rester dans la même graisse que les autres.
+   */
+  function paint(name, color) {
+    var g = GLYPHS[name];
+    if (!g.stroke) return '<path d="' + g.d + '" fill="' + color + '"/>';
+    return '<path d="' + g.d + '" fill="none" stroke="' + color + '" stroke-width="'
+         + g.stroke + '" stroke-linecap="round"/>';
   }
 
-  /** Élément SVG autonome, dimensionné en pixels (page publique). */
+  /**
+   * Pictogramme posé sur une ligne de base, dans un repère en millimètres.
+   * `size` est le corps du texte voisin : le pictogramme s'y cale comme un
+   * caractère, exactement comme dans le fichier d'impression.
+   */
+  function group(name, x, baseline, size) {
+    var k = size / UPEM;
+    return '<g transform="translate(' + x + ' ' + baseline + ') scale('
+         + k.toFixed(6) + ' ' + (-k).toFixed(6) + ')">'
+         + paint(name, arguments[4] || 'currentColor') + '</g>';
+  }
+
+  /** Élément SVG autonome dimensionné en pixels, pour la page publique. */
   function inline(name, size, cls) {
-    return '<svg viewBox="0 0 1 1" width="' + size + '" height="' + size + '"'
-         + (cls ? ' class="' + cls + '"' : '') + ' aria-hidden="true" focusable="false">'
-         + '<path d="' + PATHS[name] + '" fill="currentColor"/></svg>';
+    var b = GLYPHS[name].box;
+    var w = b[2] - b[0], h = b[3] - b[1], side = Math.max(w, h);
+    var ox = b[0] - (side - w) / 2, oy = -b[3] - (side - h) / 2;
+    return '<svg viewBox="' + ox + ' ' + oy + ' ' + side + ' ' + side + '"'
+         + ' width="' + size + '" height="' + size + '"'
+         + (cls ? ' class="' + cls + '"' : '')
+         + ' aria-hidden="true" focusable="false">'
+         + '<g transform="scale(1 -1)">' + paint(name, 'currentColor') + '</g></svg>';
   }
 
-  return { paths: PATHS, group: group, inline: inline };
+  return { UPEM: UPEM, glyphs: GLYPHS, group: group, inline: inline };
 }());

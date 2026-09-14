@@ -1,9 +1,11 @@
 {
-  "firstName": "Jérôme",
-  "lastName": "Goumard",
-  "role": "Directeur",
-  "phone": "06 42 97 36 94",
-  "email": "jerome@graffeuille.com",
+  "firstName": "Fabrice",
+  "lastName": "Pellizotti",
+  "role": "Commercial",
+  "department": "Boîtes de vitesses / Ponts",
+  "phone": "07 86 77 55 91",
+  "email": "fabrice@graffeuille.com",
+  "email2": "",
   "website": "www.graffeuille.fr",
   "websiteInContacts": false,
   "company": "GRAFFEUILLE",
@@ -16,6 +18,6 @@
   "accent": "#e63329",
   "qrLevel": "M",
   "watermark": true,
-  "bleed": false,
-  "slug": "jerome-goumard"
+  "slug": "fabrice-pellizotti",
+  "photo": ""
 }
