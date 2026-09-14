@@ -7,32 +7,11 @@
   var STORE_KEY = 'graffeuille.cards.v1';
   var LAST_KEY = 'graffeuille.cards.last';
 
-  // Valeurs reprises de la carte d'origine, servant aussi de modèle.
-  var DEFAULTS = {
-    firstName: 'Jérôme',
-    lastName: 'Goumard',
-    role: 'Directeur Adjoint',
-    phone: '06 42 97 36 94',
-    email: 'jerome@graffeuille.com',
-    website: 'www.defense-securite.graffeuille.com',
-    websiteInContacts: false,
-    company: 'GRAFFEUILLE',
-    street: 'Rte de Saint-Jean d’Angély',
-    postalCode: '16170',
-    city: 'Rouillac',
-    country: 'France',
-    tagline: 'Reconditionnement de moteurs,\nde boîtes de vitesses et de ponts.',
-    showBaseline: true,
-    accent: '#e63329',
-    qrLevel: 'M',
-    watermark: true,
-    bleed: false
-  };
+  var DEFAULTS = Contact.DEFAULTS;
 
   var SWATCHES = ['#e63329', '#b01d16', '#1f2937', '#0f4c81', '#0b7a5a', '#c2410c'];
 
-  var FIELDS = Object.keys(DEFAULTS);
-  var CHECKBOXES = ['websiteInContacts', 'showBaseline', 'watermark', 'bleed'];
+  var FIELDS = Contact.FIELDS.concat(['siteBase']);
 
   var $ = function (sel) { return document.querySelector(sel); };
   var form = $('#form');
@@ -100,18 +79,30 @@
     });
   }
 
+  /** Racine du site publié : celle qu'a saisie l'utilisateur, sinon celle d'où
+   *  l'éditeur est servi — ce qui suffit dès que le site est en ligne. */
+  function siteRoot(d) {
+    var typed = String(d.siteBase || '').trim();
+    if (typed) return typed;
+    return location.origin + location.pathname.replace(/editeur\.html$/, '');
+  }
+
   function normalise(d) {
-    var out = Object.assign({}, DEFAULTS, d || {});
-    CHECKBOXES.forEach(function (k) { out[k] = !!out[k]; });
+    var out = Contact.normalise(d);
+    out.siteBase = (d && d.siteBase) || '';
+    out.slug = Contact.slugify(out.slug);
     return out;
   }
 
   /* ----------------------------------------------------------------- rendu */
 
   function render() {
+    var url = Contact.cardUrl(siteRoot(state), state);
+    var view = Object.assign({}, state, { qrPayload: url });
+
     var front = $('#preview-front'), back = $('#preview-back');
-    front.innerHTML = Card.front(state, { bleed: state.bleed, marks: state.bleed });
-    back.innerHTML = Card.back(state, { bleed: state.bleed, marks: state.bleed });
+    front.innerHTML = Card.front(view, { bleed: state.bleed, marks: state.bleed });
+    back.innerHTML = Card.back(view, { bleed: state.bleed, marks: state.bleed });
     Card.fitBand(back.firstElementChild);
 
     // Le format de page suit l'option de fond perdu.
@@ -119,13 +110,39 @@
     var h = Card.TRIM_H + (state.bleed ? Card.BLEED * 2 : 0);
     $('#print-page').textContent = '@page { margin: 0; size: ' + w + 'mm ' + h + 'mm; }';
 
-    var vc = Card.vcard(state);
+    describeQr(url);
+
     $('#meta').innerHTML =
       'Format coupé <code>54 × 85 mm</code>'
       + (state.bleed ? ' · fond perdu <code>5 mm</code> · traits de coupe' : '')
-      + ' · QR <code>vCard 3.0</code>, ' + vc.length + ' caractères, niveau '
-      + state.qrLevel + '.<br>Le QR est régénéré à chaque modification : il porte '
-      + 'toujours les coordonnées affichées.';
+      + '. Le QR mène à la page publique, pas à une fiche figée : corriger un '
+      + 'numéro sur le site met à jour toutes les cartes déjà distribuées.';
+  }
+
+  /**
+   * Un QR imprimé à 24 mm n'est lisible que si ses modules restent assez gros.
+   * En dessous de 0,3 mm environ, les téléphones peinent ; on le dit plutôt
+   * que de laisser découvrir le problème après le tirage.
+   */
+  function describeQr(url) {
+    var box = $('#qr-target');
+    var line = '<strong>' + esc(url) + '</strong><br>';
+    try {
+      var qr = QRCode.encode(url, state.qrLevel || 'M');
+      var module = 24.19 / (qr.size + 8);
+      var verdict = module >= 0.40 ? 'très confortable à scanner'
+                  : module >= 0.30 ? 'confortable à scanner'
+                  : module >= 0.25 ? 'lisible, mais sans marge : préférez un identifiant court'
+                  : 'trop dense pour un tirage à cette taille — renseignez un identifiant court';
+      box.innerHTML = line + url.length + ' caractères · version ' + qr.version
+        + ' · module de ' + module.toFixed(2) + ' mm une fois imprimé — ' + verdict + '.';
+    } catch (err) {
+      box.innerHTML = line + 'Adresse trop longue pour tenir dans un QR code.';
+    }
+  }
+
+  function esc(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
   function update() {
@@ -136,7 +153,7 @@
   /* --------------------------------------------------------------- annuaire */
 
   function personLabel(d) {
-    return [d.firstName, (d.lastName || '').toUpperCase()].filter(Boolean).join(' ') || 'Sans nom';
+    return Contact.fullName(d) || 'Sans nom';
   }
 
   function drawRoster() {
@@ -236,7 +253,8 @@
 
   function sideSvg(side, withFont) {
     var opts = { bleed: state.bleed, marks: state.bleed };
-    var markup = side === 'front' ? Card.front(state, opts) : Card.back(state, opts);
+    var view = Object.assign({}, state, { qrPayload: Contact.cardUrl(siteRoot(state), state) });
+    var markup = side === 'front' ? Card.front(view, opts) : Card.back(view, opts);
     if (side === 'back') {
       // Le bandeau est ajusté sur un rendu hors écran, puis resérialisé.
       var host = document.createElement('div');
@@ -300,7 +318,7 @@
 
   function exportVcf() {
     download(slug(state) + '.vcf',
-      new Blob([Card.vcard(state)], { type: 'text/vcard;charset=utf-8' }));
+      new Blob([Contact.vcard(state)], { type: 'text/vcard;charset=utf-8' }));
     toast('Fiche contact téléchargée.');
   }
 
@@ -392,10 +410,31 @@
       } else window.prompt('Lien de la carte :', url);
     });
 
+    $('#btn-open-public').addEventListener('click', function (ev) {
+      ev.preventDefault();
+      window.open(Contact.cardUrl(siteRoot(state), state), '_blank', 'noopener');
+    });
+
     $('#btn-print').addEventListener('click', print);
     $('#btn-vcf').addEventListener('click', exportVcf);
     $('#btn-svg').addEventListener('click', exportSvg);
     $('#btn-png').addEventListener('click', exportPng);
+
+    // Fiche d'une personne, à déposer dans le dossier cartes/ du site pour
+    // que l'identifiant court fonctionne.
+    $('#btn-export-card').addEventListener('click', function () {
+      var name = state.slug || slug(state);
+      if (!state.slug) {
+        form.elements.slug.value = name;
+        update();
+      }
+      var record = Object.assign({}, state, { slug: name });
+      delete record.siteBase;   // propre à ce poste, pas à la fiche
+      delete record.bleed;      // réglage d'impression, pas une coordonnée
+      download(name + '.json',
+        new Blob([JSON.stringify(record, null, 2) + '\n'], { type: 'application/json' }));
+      toast('Fiche « ' + name + '.json » à déposer dans le dossier cartes/ du site.');
+    });
 
     $('#btn-export-json').addEventListener('click', function () {
       download('annuaire-graffeuille.json',

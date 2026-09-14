@@ -32,38 +32,9 @@
 
   var FONT = "'Inter','Helvetica Neue',Helvetica,Arial,sans-serif";
 
-  /* ------------------------------------------------------------ pictogrammes
-   * Chacun est décrit dans un carré de 1 × 1 puis mis à l'échelle : la
-   * définition est ainsi indépendante de la taille de rendu.
-   */
-  var ICONS = {
-    phone: 'M0.29 0.04 C0.25 -0.02 0.17 -0.01 0.12 0.04 L0.05 0.12'
-         + 'C0.00 0.17 -0.01 0.25 0.02 0.32 C0.15 0.62 0.38 0.85 0.68 0.98'
-         + 'C0.75 1.01 0.83 1.00 0.88 0.95 L0.96 0.88 C1.01 0.83 1.02 0.75 0.96 0.71'
-         + 'L0.78 0.58 C0.73 0.54 0.66 0.55 0.62 0.60 L0.54 0.69'
-         + 'C0.40 0.60 0.28 0.48 0.19 0.34 L0.28 0.26 C0.33 0.22 0.34 0.15 0.30 0.10 Z',
-    mail:  'M0.02 0.18 C0.02 0.12 0.07 0.07 0.13 0.07 L0.87 0.07 C0.93 0.07 0.98 0.12 0.98 0.18'
-         + 'L0.98 0.22 L0.50 0.55 L0.02 0.22 Z M0.02 0.35 L0.46 0.66 C0.49 0.68 0.51 0.68 0.54 0.66'
-         + 'L0.98 0.35 L0.98 0.79 C0.98 0.85 0.93 0.90 0.87 0.90 L0.13 0.90 C0.07 0.90 0.02 0.85 0.02 0.79 Z',
-    pin:   'M0.50 0.02 C0.29 0.02 0.12 0.19 0.12 0.40 C0.12 0.66 0.42 0.94 0.46 0.97'
-         + 'C0.48 0.99 0.52 0.99 0.54 0.97 C0.58 0.94 0.88 0.66 0.88 0.40 C0.88 0.19 0.71 0.02 0.50 0.02 Z'
-         + 'M0.50 0.53 C0.43 0.53 0.37 0.47 0.37 0.40 C0.37 0.33 0.43 0.27 0.50 0.27'
-         + 'C0.57 0.27 0.63 0.33 0.63 0.40 C0.63 0.47 0.57 0.53 0.50 0.53 Z',
-    globe: 'M0.50 0.02 C0.23 0.02 0.02 0.23 0.02 0.50 C0.02 0.77 0.23 0.98 0.50 0.98'
-         + 'C0.77 0.98 0.98 0.77 0.98 0.50 C0.98 0.23 0.77 0.02 0.50 0.02 Z'
-         + 'M0.50 0.12 C0.60 0.12 0.70 0.28 0.73 0.45 L0.27 0.45 C0.30 0.28 0.40 0.12 0.50 0.12 Z'
-         + 'M0.50 0.88 C0.40 0.88 0.30 0.72 0.27 0.55 L0.73 0.55 C0.70 0.72 0.60 0.88 0.50 0.88 Z'
-         + 'M0.12 0.45 C0.14 0.30 0.24 0.18 0.37 0.14 C0.30 0.24 0.25 0.34 0.23 0.45 Z'
-         + 'M0.77 0.45 C0.75 0.34 0.70 0.24 0.63 0.14 C0.76 0.18 0.86 0.30 0.88 0.45 Z'
-         + 'M0.23 0.55 C0.25 0.66 0.30 0.76 0.37 0.86 C0.24 0.82 0.14 0.70 0.12 0.55 Z'
-         + 'M0.88 0.55 C0.86 0.70 0.76 0.82 0.63 0.86 C0.70 0.76 0.75 0.66 0.77 0.55 Z'
-  };
-
   function icon(name, x, baseline, size, fill) {
     // `baseline` cale le pictogramme sur la ligne de base du texte voisin.
-    var y = baseline - size * 0.82;
-    return '<g transform="translate(' + f(x) + ' ' + f(y) + ') scale(' + f(size) + ')">'
-         + '<path d="' + ICONS[name] + '" fill="' + fill + '"/></g>';
+    return Icons.group(name, f(x), f(baseline - size * 0.82), f(size), fill);
   }
 
   /* ------------------------------------------------------------------ outils */
@@ -114,29 +85,6 @@
     });
     return '<path d="' + p.join('') + '" fill="none" stroke="' + color
          + '" stroke-width="0.15"/>';
-  }
-
-  /* ------------------------------------------------------------- vCard / QR */
-
-  /** Construit la vCard 3.0 encodée dans le QR code et proposée au téléchargement. */
-  function vcard(d) {
-    var lines = [
-      'BEGIN:VCARD',
-      'VERSION:3.0',
-      'N:' + (d.lastName || '') + ';' + (d.firstName || '') + ';;;',
-      'FN:' + [d.firstName, d.lastName].filter(Boolean).join(' ')
-    ];
-    if (d.company) lines.push('ORG:' + d.company);
-    if (d.role) lines.push('TITLE:' + d.role);
-    if (d.phone) lines.push('TEL;TYPE=CELL:' + d.phone.replace(/\s+/g, ''));
-    if (d.street || d.city) {
-      lines.push('ADR;TYPE=WORK:;;' + (d.street || '') + ';' + (d.city || '') + ';;'
-                 + (d.postalCode || '') + ';' + (d.country || ''));
-    }
-    if (d.email) lines.push('EMAIL;TYPE=WORK,INTERNET:' + d.email);
-    if (d.website) lines.push('URL:' + d.website);
-    lines.push('END:VCARD');
-    return lines.join('\r\n');
   }
 
   /* ------------------------------------------------------------------ rendu */
@@ -202,10 +150,9 @@
              + '" fill="none" stroke="' + accent + '" stroke-width="0.176"/></g>');
     }
 
-    // QR code : la vCard est régénérée à chaque modification du formulaire.
-    var payload = vcard(d);
+    // QR code : il mène à la page publique, régénéré à chaque modification.
     try {
-      var qr = QRCode.toSvgPath(payload, d.qrLevel || 'M', g.qr.size, 4);
+      var qr = QRCode.toSvgPath(d.qrPayload || '', d.qrLevel || 'M', g.qr.size, 4);
       out.push('<rect x="' + f(g.qr.x) + '" y="' + f(g.qr.y) + '" width="' + f(g.qr.size)
              + '" height="' + f(g.qr.size) + '" fill="#FFFFFF"/>');
       out.push('<g transform="translate(' + f(g.qr.x) + ' ' + f(g.qr.y) + ')">'
@@ -215,7 +162,7 @@
     }
 
     // Bandeau du nom : sa largeur est ajustée après rendu (voir fitBand).
-    var fullName = [d.firstName, (d.lastName || '').toUpperCase()].filter(Boolean).join(' ');
+    var fullName = Contact.fullName(d);
     out.push('<rect id="band-' + uid + '" x="' + f(g.band.x) + '" y="' + f(g.band.top)
            + '" width="' + f(TRIM_W - g.band.x * 2) + '" height="' + f(g.band.height)
            + '" fill="' + accent + '"/>');
@@ -296,6 +243,6 @@
 
   global.Card = {
     TRIM_W: TRIM_W, TRIM_H: TRIM_H, BLEED: BLEED,
-    front: renderFront, back: renderBack, vcard: vcard, fitBand: fitBand
+    front: renderFront, back: renderBack, fitBand: fitBand
   };
 }(window));
