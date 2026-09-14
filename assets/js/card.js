@@ -17,7 +17,10 @@
       qr:         { x: 6.11, y: 5.83, size: 24.19 },
       band:       { x: 7.40, top: 32.16, height: 4.233, padding: 1.0 },
       name:       { x: 8.40, baseline: 35.39, size: 4.233 },
-      role:       { x: 8.40, baseline: 41.27, size: 3.528 },
+      role:       { x: 8.40, baseline: 41.27, size: 3.528,
+                    // Les fonctions sur deux lignes passent en 9 pt pour la
+                    // seconde, comme sur les cartes d'origine.
+                    line2: { baseline: 45.15, size: 3.175 } },
       rows:       { iconX: 7.28, textX: 11.40, size: 3.175,
                     baselines: [53.66, 57.90, 62.14] },
       address:    { baseline: 70.00, lead: 2.822, size: 2.822, iconGap: 1.2 }
@@ -53,6 +56,7 @@
     if (opts.anchor) a.push('text-anchor="' + opts.anchor + '"');
     if (opts.spacing) a.push('letter-spacing="' + f(opts.spacing) + '"');
     if (opts.id) a.push('id="' + opts.id + '"');
+    if (opts.cls) a.push('class="' + opts.cls + '"');
     return '<text ' + a.join(' ') + '>' + esc(str) + '</text>';
   }
 
@@ -162,18 +166,22 @@
            + '" fill="' + accent + '"/>');
     out.push(text(fullName, { x: g.name.x, y: g.name.baseline, size: g.name.size,
                               fill: '#FFFFFF', weight: 600, id: 'name-' + uid }));
-    out.push(text(d.role, { x: g.role.x, y: g.role.baseline, size: g.role.size,
-                            fill: '#111111', weight: 500, italic: true }));
+    String(d.role || '').split('\n').slice(0, 2).forEach(function (line, i) {
+      var spec = i === 0 ? g.role : g.role.line2;
+      out.push(text(line.trim(), { x: g.role.x, y: spec.baseline, size: spec.size,
+                                   fill: '#111111', weight: 500, italic: true }));
+    });
 
     // Lignes de contact : seules les valeurs renseignées occupent une ligne.
     var rows = [];
     if (d.phone) rows.push(['phone', d.phone]);
-    if (d.email) rows.push(['mail', d.email]);
+    Contact.emails(d).forEach(function (address) { rows.push(['mail', address]); });
     if (d.website && d.websiteInContacts) rows.push(['globe', d.website]);
     rows.slice(0, g.rows.baselines.length).forEach(function (row, i) {
       var base = g.rows.baselines[i];
       out.push(icon(row[0], g.rows.iconX, base, g.rows.size * 0.95, accent));
-      out.push(text(row[1], { x: g.rows.textX, y: base, size: g.rows.size, fill: '#111111', weight: 500 }));
+      out.push(text(row[1], { x: g.rows.textX, y: base, size: g.rows.size,
+                              fill: '#111111', weight: 500, cls: 'row-' + uid }));
     });
 
     // Bloc adresse centré, pictogramme inclus dans le centrage de la 1re ligne.
@@ -222,6 +230,25 @@
       band.setAttribute('width', Math.max(w + g.band.padding * 2, 4));
       band.setAttribute('x', g.name.x - g.band.padding);
     }
+    // Les lignes de contact se resserrent quand l'une d'elles déborde, comme
+    // le fait la carte d'origine pour les adresses les plus longues.
+    var rows = svgEl.querySelectorAll('[class^="row-"]');
+    if (rows.length) {
+      var widest = 0;
+      try {
+        Array.prototype.forEach.call(rows, function (el) {
+          widest = Math.max(widest, el.getComputedTextLength());
+        });
+      } catch (e) { widest = 0; }
+      var room = TRIM_W - g.rows.textX - 4.5;   // marge droite comparable à la marge gauche
+      if (widest > room) {
+        var size = Math.max(g.rows.size * room / widest, g.rows.size * 0.8);
+        Array.prototype.forEach.call(rows, function (el) {
+          el.setAttribute('font-size', f(size));
+        });
+      }
+    }
+
     var org = svgEl.querySelector('[id^="org-"]');
     var pin = svgEl.querySelector('[id^="pin-"] path');
     if (org && pin) {

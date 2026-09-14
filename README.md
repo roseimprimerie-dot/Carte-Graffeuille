@@ -30,7 +30,29 @@ equipe/
 déclarer : il n'y a pas de liste centrale à tenir à jour, le dossier *est* la
 déclaration.
 
+### L'équipe déjà en place
+
+| Dossier | Personne | Fonction |
+| --- | --- | --- |
+| `alain-graffeuille` | Alain GRAFFEUILLE | Directeur |
+| `jerome-goumard` | Jérôme GOUMARD | Directeur |
+| `sarah-fossard` | Sarah FOSSARD | Commerciale, Grands Comptes |
+| `fabrice-pellizotti` | Fabrice PELLIZOTTI | Commercial, Boîtes de vitesses / Ponts |
+| `jean-michel-gaisnon` | Jean-Michel GAISNON | Responsable Atelier, Production Moteurs |
+| `loic-bernard` | Loïc BERNARD | Responsable Atelier, Production Moteurs |
+
+Les coordonnées sont reprises des fichiers d'impression fournis. Deux cas que
+ces cartes ont fait apparaître et que le code gère désormais :
+
+- **Fonction sur deux lignes.** La seconde s'imprime en 9 pt sous la première
+  en 10 pt, comme sur les cartes d'origine.
+- **Second courriel.** Il occupe une troisième ligne de contact ; si l'une des
+  adresses est trop longue, les trois lignes se resserrent ensemble plutôt que
+  de déborder du format.
+
 ### Ajouter un employé
+
+
 
 1. Dupliquer `equipe/_modele/`, le renommer `prenom-nom`.
 2. Dans l'éditeur, remplir le formulaire, mettre `prenom-nom` dans

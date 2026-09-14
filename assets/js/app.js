@@ -391,12 +391,16 @@
 
     $('#btn-new').addEventListener('click', function () {
       currentId = null;
+      // Tout ce qui appartient à une personne repart à zéro — l'identifiant
+      // surtout : conservé, il ferait écraser le dossier du précédent.
       writeForm(Object.assign({}, DEFAULTS, {
-        firstName: '', lastName: '', role: '', phone: '', email: ''
+        firstName: '', lastName: '', role: '', phone: '',
+        email: '', email2: '', slug: '', photo: '',
+        siteBase: form.elements.siteBase.value
       }));
       update(); drawRoster(); rememberLast();
       location.hash = '';
-      toast('Nouvelle carte : l’identité visuelle est conservée.');
+      toast('Nouvelle carte : l’entreprise et l’identité visuelle sont conservées.');
     });
 
     $('#btn-share').addEventListener('click', function () {

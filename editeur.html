@@ -45,7 +45,9 @@
           </div>
           <div class="field full">
             <label for="role">Fonction</label>
-            <input type="text" id="role" name="role" placeholder="Directeur Adjoint">
+            <textarea id="role" name="role" rows="2" placeholder="Responsable Atelier&#10;Production Moteurs"></textarea>
+            <span class="hint">Deux lignes au maximum. La seconde s’imprime un
+              cran plus petit, comme sur les cartes existantes.</span>
           </div>
         </div>
       </div>
@@ -62,6 +64,12 @@
           <div class="field">
             <label for="email">Courriel</label>
             <input type="email" id="email" name="email" placeholder="prenom@graffeuille.com">
+          </div>
+          <div class="field full">
+            <label for="email2">Second courriel</label>
+            <input type="email" id="email2" name="email2" placeholder="service@graffeuille.com">
+            <span class="hint">Facultatif. Occupe une ligne de plus au verso ; si
+              elle est longue, les trois lignes se resserrent automatiquement.</span>
           </div>
           <div class="field full">
             <label for="website">Site internet</label>
