@@ -141,9 +141,26 @@ button.danger { color: #c0392b; }
   padding: 24px 20px 80px;
 }
 
+/* Panneau étroit (téléphone, aperçu intégré) : l'aperçu devient un bandeau
+ * fixe en haut et le formulaire remonte juste en dessous, pour que les champs
+ * soient visibles sans avoir à faire défiler la page. */
 @media (max-width: 900px) {
-  .layout { grid-template-columns: minmax(0, 1fr); }
-  .preview-col { order: -1; }
+  .layout { display: flex; flex-direction: column; gap: 16px; padding-top: 0; }
+  .topbar { position: static; }
+  .preview-col { display: contents; }
+  .preview-stage {
+    order: 1;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg);
+    padding-block: 10px;
+  }
+  #form { order: 2; }
+  .preview-tools { order: 3; }
+  .cards { padding: 12px 10px; gap: 12px; }
+  .card-slot .card-svg { width: 104px; }
+  .card-slot figcaption { font-size: 10px; }
 }
 
 /* ------------------------------------------------------------------ formulaire */
@@ -231,6 +248,7 @@ input[type="color"] {
 /* ------------------------------------------------------------------- aperçu */
 
 .preview-col { position: sticky; top: 76px; }
+.preview-stage { padding-block: 0; }
 
 .cards {
   display: flex;
@@ -263,6 +281,18 @@ input[type="color"] {
 }
 
 .exports { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+
+.notice {
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+  background: var(--panel-2);
+  border: 1px solid var(--line-strong);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+}
 
 .meta {
   margin-top: 12px;

@@ -171,25 +171,29 @@
 
   <!-- --------------------------------------------------------------- aperçu -->
   <div class="preview-col">
-    <div class="cards">
-      <figure class="card-slot" style="margin:0">
-        <div id="preview-front"></div>
-        <figcaption>Recto</figcaption>
-      </figure>
-      <figure class="card-slot" style="margin:0">
-        <div id="preview-back"></div>
-        <figcaption>Verso</figcaption>
-      </figure>
+    <div class="preview-stage">
+      <div class="cards">
+        <figure class="card-slot" style="margin:0">
+          <div id="preview-front"></div>
+          <figcaption>Recto</figcaption>
+        </figure>
+        <figure class="card-slot" style="margin:0">
+          <div id="preview-back"></div>
+          <figcaption>Verso</figcaption>
+        </figure>
+      </div>
     </div>
 
-    <div class="exports">
-      <button type="button" id="btn-print" class="primary">Imprimer / PDF</button>
-      <button type="button" id="btn-vcf">Fiche contact .vcf</button>
-      <button type="button" id="btn-svg">SVG</button>
-      <button type="button" id="btn-png">PNG 600 dpi</button>
+    <div class="preview-tools">
+      <div class="exports">
+        <button type="button" id="btn-print" class="primary">Imprimer / PDF</button>
+        <button type="button" id="btn-vcf">Fiche contact .vcf</button>
+        <button type="button" id="btn-svg">SVG</button>
+        <button type="button" id="btn-png">PNG 600 dpi</button>
+      </div>
+      <p class="notice" id="embedded-notice" hidden></p>
+      <p class="meta" id="meta"></p>
     </div>
-
-    <p class="meta" id="meta"></p>
   </div>
 </main>
 
