@@ -420,20 +420,21 @@
     $('#btn-svg').addEventListener('click', exportSvg);
     $('#btn-png').addEventListener('click', exportPng);
 
-    // Fiche d'une personne, à déposer dans le dossier cartes/ du site pour
-    // que l'identifiant court fonctionne.
+    // Fiche d'une personne : elle se dépose dans son dossier, sous le nom
+    // carte.json, à côté de l'index.html copié depuis equipe/_modele.
     $('#btn-export-card').addEventListener('click', function () {
-      var name = state.slug || slug(state);
+      var folder = state.slug || slug(state);
       if (!state.slug) {
-        form.elements.slug.value = name;
+        form.elements.slug.value = folder;
         update();
       }
-      var record = Object.assign({}, state, { slug: name });
+      var record = Object.assign({}, state, { slug: folder });
       delete record.siteBase;   // propre à ce poste, pas à la fiche
       delete record.bleed;      // réglage d'impression, pas une coordonnée
-      download(name + '.json',
+      download('carte.json',
         new Blob([JSON.stringify(record, null, 2) + '\n'], { type: 'application/json' }));
-      toast('Fiche « ' + name + '.json » à déposer dans le dossier cartes/ du site.');
+      toast('À déposer dans equipe/' + folder + '/carte.json, '
+        + 'à côté d’un index.html copié depuis equipe/_modele.');
     });
 
     $('#btn-export-json').addEventListener('click', function () {

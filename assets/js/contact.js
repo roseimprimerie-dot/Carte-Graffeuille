@@ -25,7 +25,8 @@ window.Contact = (function () {
     qrLevel: 'M',
     watermark: true,
     bleed: false,
-    slug: ''
+    slug: '',
+    photo: ''
   };
 
   var FIELDS = Object.keys(DEFAULTS);
@@ -145,7 +146,7 @@ window.Contact = (function () {
   function cardUrl(base, d) {
     var root = String(base || '').replace(/(editeur\.html)?(#.*)?$/, '');
     if (!/\/$/.test(root)) root += '/';
-    return root + '#' + (d.slug ? d.slug : 'c=' + pack(d));
+    return d.slug ? root + 'equipe/' + d.slug + '/' : root + '#c=' + pack(d);
   }
 
   /** Lit le fragment d'URL d'une page publique : identifiant ou coordonnées. */
