@@ -145,7 +145,10 @@ body {
   margin: 12px 0 0;
   font-size: 16px;
   font-style: italic;
+  line-height: 1.35;
   color: var(--ink-muted);
+  /* Les fonctions tiennent parfois sur deux lignes, comme à l'impression. */
+  white-space: pre-line;
 }
 
 /* --------------------------------------------------------------- contacts */

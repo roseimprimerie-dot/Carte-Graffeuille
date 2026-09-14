@@ -1,11 +1,11 @@
 {
-  "firstName": "Jérôme",
-  "lastName": "Goumard",
-  "role": "Directeur",
-  "phone": "06 42 97 36 94",
-  "email": "jerome@graffeuille.com",
+  "firstName": "Jean-Michel",
+  "lastName": "Gaisnon",
+  "role": "Responsable Atelier\nProduction Moteurs",
+  "phone": "06 33 07 08 36",
+  "email": "jeanmichel@graffeuille.com",
   "email2": "",
-  "website": "www.graffeuille.fr",
+  "website": "www.defense-securite.graffeuille.com",
   "websiteInContacts": false,
   "company": "GRAFFEUILLE",
   "street": "120, route de Saint-Jean d’Angély",
@@ -17,7 +17,6 @@
   "accent": "#e63329",
   "qrLevel": "M",
   "watermark": true,
-  "bleed": false,
-  "slug": "jerome-goumard",
+  "slug": "jean-michel-gaisnon",
   "photo": ""
 }

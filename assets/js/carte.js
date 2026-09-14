@@ -95,9 +95,10 @@
     if (d.phone) {
       out.push(row('phone', 'Téléphone', d.phone, 'tel:' + d.phone.replace(/\s+/g, '')));
     }
-    if (d.email) {
-      out.push(row('mail', 'Courriel', d.email, 'mailto:' + d.email));
-    }
+    Contact.emails(d).forEach(function (address, i) {
+      out.push(row('mail', i === 0 ? 'Courriel' : 'Autre courriel',
+                   address, 'mailto:' + address));
+    });
     if (d.website) {
       out.push(row('globe', 'Site internet', d.website, Contact.websiteUrl(d),
                    ' target="_blank" rel="noopener"'));
