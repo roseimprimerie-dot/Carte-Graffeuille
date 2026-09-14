@@ -84,6 +84,31 @@ window.Contact = (function () {
     return [d.email, d.email2].filter(Boolean);
   }
 
+  /**
+   * Numéro au format international E.164, seul format qu'un téléphone sache
+   * reconnaître à coup sûr. Sans indicatif, « 05 45 96 44 78 » arrive dans le
+   * carnet d'adresses comme une suite de chiffres que l'appareil regroupe
+   * selon ses propres habitudes — d'où des « 054-596-4478 ».
+   */
+  function e164(phone) {
+    var raw = String(phone || '').replace(/[\s.\-()\u00a0]/g, '');
+    if (raw.charAt(0) === '+') return raw;
+    if (raw.slice(0, 2) === '00') return '+' + raw.slice(2);
+    // Plan de numérotation français : un 0 suivi de neuf chiffres.
+    if (/^0\d{9}$/.test(raw)) return '+33' + raw.slice(1);
+    return raw;
+  }
+
+  /**
+   * Nature de la ligne, d'après le plan français : 06 et 07 sont des mobiles,
+   * le reste des postes fixes. Marquer un fixe « mobile » le rangerait au
+   * mauvais endroit dans le carnet d'adresses.
+   */
+  function telType(phone) {
+    var raw = e164(phone);
+    return /^\+33[67]/.test(raw) ? 'CELL,WORK' : 'WORK,VOICE';
+  }
+
   function vcard(d) {
     var lines = [
       'BEGIN:VCARD',
@@ -95,7 +120,7 @@ window.Contact = (function () {
     // TITLE ne tient que sur une ligne, là où la carte imprimée peut en avoir deux.
     var title = [d.role, d.department].filter(Boolean).join(' — ').split('\n').join(' ');
     if (title) lines.push('TITLE:' + title);
-    if (d.phone) lines.push('TEL;TYPE=CELL:' + d.phone.replace(/\s+/g, ''));
+    if (d.phone) lines.push('TEL;TYPE=' + telType(d.phone) + ':' + e164(d.phone));
     if (d.street || d.city) {
       lines.push('ADR;TYPE=WORK:;;' + (d.street || '') + ';' + (d.city || '') + ';;'
                  + (d.postalCode || '') + ';' + (d.country || ''));
@@ -177,7 +202,8 @@ window.Contact = (function () {
     DEFAULTS: DEFAULTS, FIELDS: FIELDS, CHECKBOXES: CHECKBOXES,
     normalise: normalise, fullName: fullName, slugify: slugify,
     cityLine: cityLine, addressQuery: addressQuery, websiteUrl: websiteUrl,
-    vcard: vcard, emails: emails, pack: pack, unpack: unpack,
+    vcard: vcard, emails: emails, e164: e164, telType: telType,
+    pack: pack, unpack: unpack,
     cardUrl: cardUrl, readFragment: readFragment
   };
 }());
