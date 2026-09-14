@@ -1,11 +1,9 @@
 {
   "firstName": "Sarah",
   "lastName": "Fossard",
-  "role": "Commerciale",
-  "department": "Grands Comptes",
+  "role": "Commerciale - Grands Comptes", 
   "phone": "05 45 96 44 78",
   "email": "sfossard@graffeuille.com",
-  "email2": "defense-securite@graffeuille.com",
   "website": "www.graffeuille.fr",
   "websiteInContacts": false,
   "company": "GRAFFEUILLE",
