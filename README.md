@@ -1,4 +1,4 @@
-# Cartes de visite GRAFFEUILLE — éditeur en ligne
+# Cartes de visite GRAFFEUILLE - éditeur en ligne
 
 Application web qui reproduit à l'identique la carte de visite **GRAFFEUILLE /
 Turgis Gaillard** et permet de la modifier pour n'importe quel collaborateur :
