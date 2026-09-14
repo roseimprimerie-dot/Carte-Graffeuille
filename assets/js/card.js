@@ -1,16 +1,10 @@
-/*!
- * card.js — rendu vectoriel de la carte de visite GRAFFEUILLE.
- *
- * La carte est produite en SVG dans un repère en millimètres calqué sur le
- * fichier d'impression d'origine : format coupé 54 × 85 mm, fond perdu 5 mm.
- * Le même rendu sert à l'aperçu écran, à l'impression PDF et aux exports.
- */
 (function (global) {
   'use strict';
 
   var TRIM_W = 54, TRIM_H = 85, BLEED = 5, MARK_LEN = 5, MARK_GAP = 2;
 
-  // Repères verticaux repris au millimètre près du fichier d'origine.
+  // Repères verticaux repris des anciennes cartes
+  
   var GEO = {
     recto: {
       arrow:      { x: 5.62, y: 56.83, size: 5.22 },
