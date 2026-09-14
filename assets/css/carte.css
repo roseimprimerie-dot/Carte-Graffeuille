@@ -141,6 +141,12 @@ body {
   text-wrap: balance;
 }
 
+.department {
+  margin: 3px 0 0;
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
 .role {
   margin: 12px 0 0;
   font-size: 16px;

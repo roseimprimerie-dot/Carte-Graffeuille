@@ -15,23 +15,31 @@
     },
     verso: {
       qr:         { x: 6.11, y: 5.83, size: 24.19 },
-      band:       { x: 7.40, top: 32.16, height: 4.233, padding: 1.0 },
-      name:       { x: 8.40, baseline: 35.39, size: 4.233 },
-      role:       { x: 8.40, baseline: 41.27, size: 3.528,
-                    // Les fonctions sur deux lignes passent en 9 pt pour la
-                    // seconde, comme sur les cartes d'origine.
-                    line2: { baseline: 45.15, size: 3.175 } },
-      rows:       { iconX: 7.28, textX: 11.40, size: 3.175,
-                    baselines: [53.66, 57.90, 62.14] },
-      address:    { baseline: 70.00, lead: 2.822, size: 2.822, iconGap: 1.2 }
+      // Le verso suit une grille régulière, relevée sur les cartes fournies :
+      // 3,88 mm (11 pt) entre deux lignes du bloc identité, 5,88 mm entre la
+      // dernière ligne du nom et la fonction, et un bloc de contact qui ne
+      // descend que lorsque l'identité déborde sur lui.
+      ident:      { x: 8.40, baseline: 35.39, lead: 3.88, gapToRole: 5.88,
+                    nameSize: 4.233, roleSize: 3.528, departmentSize: 3.175,
+                    band: { x: 7.40, height: 4.233, padding: 1.0, rise: 1.12 } },
+      rows:       { iconX: 7.28, textX: 11.40, size: 3.175, lead: 4.24,
+                    baseline: 53.66, clearance: 7.13, max: 3 },
+      address:    { baseline: 70.00, lead: 2.822, size: 2.822, iconGap: 1.0,
+                    pinSize: 3.175, pinDrop: 0.19 }
     }
   };
 
-  var FONT = "'Inter','Helvetica Neue',Helvetica,Arial,sans-serif";
+  // Roboto Condensed tient lieu d'Author, la fonte du fichier d'origine, qui
+  // est sous licence commerciale. Ses largeurs la reproduisent à 0,4 % près sur
+  // les chaînes des cartes fournies, alors qu'un grotesque de largeur normale
+  // déborde de plus de 20 % — de quoi faire passer un nom sur deux lignes.
+  var FONT = "'Roboto Condensed','Roboto Condensed Fallback',"
+           + "'Helvetica Neue Condensed','Arial Narrow',Helvetica,Arial,sans-serif";
 
+  // Les pictogrammes se posent sur la ligne de base comme un caractère : c'est
+  // ainsi que le fichier d'origine les place, et leur repère le permet.
   function icon(name, x, baseline, size, fill) {
-    // `baseline` cale le pictogramme sur la ligne de base du texte voisin.
-    return Icons.group(name, f(x), f(baseline - size * 0.82), f(size), fill);
+    return Icons.group(name, f(x), f(baseline), size, fill);
   }
 
   /* ------------------------------------------------------------------ outils */
@@ -57,6 +65,7 @@
     if (opts.spacing) a.push('letter-spacing="' + f(opts.spacing) + '"');
     if (opts.id) a.push('id="' + opts.id + '"');
     if (opts.cls) a.push('class="' + opts.cls + '"');
+    if (opts.data) a.push(opts.data);
     return '<text ' + a.join(' ') + '>' + esc(str) + '</text>';
   }
 
@@ -129,6 +138,35 @@
     return out.join('');
   }
 
+  /**
+   * Lignes du bloc identité, posées sur la grille du verso. `wrap` porte les
+   * coupures décidées après mesure du texte ; sans lui, chaque champ tient sur
+   * une seule ligne.
+   */
+  function identityLines(d, wrap) {
+    var g = GEO.verso.ident;
+    wrap = wrap || {};
+    var parts = [];
+    (wrap.name || [Contact.fullName(d)]).forEach(function (t) {
+      if (t) parts.push({ kind: 'name', text: t, size: g.nameSize });
+    });
+    (wrap.role || String(d.role || '').split('\n')).forEach(function (t) {
+      if (t && t.trim()) parts.push({ kind: 'role', text: t.trim(), size: g.roleSize });
+    });
+    if (d.department) {
+      parts.push({ kind: 'department', text: d.department, size: g.departmentSize });
+    }
+    if (!parts.length) parts.push({ kind: 'name', text: '', size: g.nameSize });
+
+    var y = g.baseline, previous = null;
+    parts.forEach(function (line) {
+      if (previous) y += (previous === 'name' && line.kind !== 'name') ? g.gapToRole : g.lead;
+      line.baseline = y;
+      previous = line.kind;
+    });
+    return parts;
+  }
+
   /** Verso : filigrane, QR vCard, coordonnées. */
   function renderBack(d, opts) {
     opts = opts || {};
@@ -159,27 +197,37 @@
       out.push(text('QR indisponible', { x: g.qr.x, y: g.qr.y + 5, size: 2.5, fill: '#999' }));
     }
 
-    // Bandeau du nom : sa largeur est ajustée après rendu (voir fitBand).
-    var fullName = Contact.fullName(d);
-    out.push('<rect id="band-' + uid + '" x="' + f(g.band.x) + '" y="' + f(g.band.top)
-           + '" width="' + f(TRIM_W - g.band.x * 2) + '" height="' + f(g.band.height)
-           + '" fill="' + accent + '"/>');
-    out.push(text(fullName, { x: g.name.x, y: g.name.baseline, size: g.name.size,
-                              fill: '#FFFFFF', weight: 600, id: 'name-' + uid }));
-    String(d.role || '').split('\n').slice(0, 2).forEach(function (line, i) {
-      var spec = i === 0 ? g.role : g.role.line2;
-      out.push(text(line.trim(), { x: g.role.x, y: spec.baseline, size: spec.size,
-                                   fill: '#111111', weight: 500, italic: true }));
+    // Bloc identité : chaque ligne de nom porte son propre bandeau rouge,
+    // ajusté à sa largeur après rendu.
+    var lines = identityLines(d, opts.wrap);
+    lines.forEach(function (line, i) {
+      if (line.kind === 'name') {
+        out.push('<rect class="band-' + uid + '" data-line="' + i + '" x="' + f(g.ident.band.x)
+               + '" y="' + f(line.baseline - g.ident.band.height + g.ident.band.rise)
+               + '" width="' + f(TRIM_W - g.ident.band.x * 2)
+               + '" height="' + f(g.ident.band.height) + '" fill="' + accent + '"/>');
+      }
+      out.push(text(line.text, {
+        x: g.ident.x, y: line.baseline, size: line.size,
+        fill: line.kind === 'name' ? '#FFFFFF' : '#111111',
+        weight: line.kind === 'department' ? 400 : (line.kind === 'name' ? 600 : 500),
+        italic: line.kind === 'role',
+        cls: line.kind === 'name' ? 'name-' + uid : 'ident-' + uid,
+        data: 'data-line="' + i + '"'
+      }));
     });
 
-    // Lignes de contact : seules les valeurs renseignées occupent une ligne.
+    // Lignes de contact : elles ne descendent que si le bloc identité vient à
+    // leur rencontre, comme sur les cartes à nom ou fonction longs.
+    var lastIdent = lines[lines.length - 1].baseline;
+    var firstRow = Math.max(g.rows.baseline, lastIdent + g.rows.clearance);
     var rows = [];
     if (d.phone) rows.push(['phone', d.phone]);
     Contact.emails(d).forEach(function (address) { rows.push(['mail', address]); });
     if (d.website && d.websiteInContacts) rows.push(['globe', d.website]);
-    rows.slice(0, g.rows.baselines.length).forEach(function (row, i) {
-      var base = g.rows.baselines[i];
-      out.push(icon(row[0], g.rows.iconX, base, g.rows.size * 0.95, accent));
+    rows.slice(0, g.rows.max).forEach(function (row, i) {
+      var base = firstRow + i * g.rows.lead;
+      out.push(icon(row[0], g.rows.iconX, base, g.rows.size, accent));
       out.push(text(row[1], { x: g.rows.textX, y: base, size: g.rows.size,
                               fill: '#111111', weight: 500, cls: 'row-' + uid }));
     });
@@ -202,7 +250,7 @@
                                   fill: '#111111', weight: line.weight, anchor: 'middle',
                                   id: 'org-' + uid }));
         out.push('<g id="pin-' + uid + '">'
-               + icon('pin', cx - a.size * 0.45, y, a.size * 0.95, accent) + '</g>');
+               + icon('pin', cx - a.size * 0.45, y + a.pinDrop, a.pinSize, accent) + '</g>');
       } else {
         out.push(text(line.str, { x: cx, y: y, size: a.size, fill: '#111111',
                                   weight: line.weight, anchor: 'middle' }));
@@ -214,22 +262,75 @@
     return out.join('');
   }
 
+  /* ------------------------------------------------- mise en page mesurée */
+
+  /** Place de coupure d'une chaîne trop large, cherchée sur les espaces. */
+  function breakPoint(el, room) {
+    var str = el.textContent, best = 0;
+    for (var i = 0; i < str.length; i++) {
+      if (str.charAt(i) !== ' ') continue;
+      if (el.getSubStringLength(0, i) <= room) best = i;
+      else break;
+    }
+    if (!best) return null;
+    return [str.slice(0, best), str.slice(best + 1)];
+  }
+
   /**
-   * Ajuste, une fois le SVG dans le document, le bandeau rouge à la largeur
-   * réelle du nom et recentre le pictogramme de l'adresse. Ces deux réglages
-   * demandent de mesurer le texte, ce qui n'est possible qu'après rendu.
+   * Décide les coupures du bloc identité à partir du texte réellement rendu.
+   * Renvoie null si tout tient déjà sur une ligne.
+   */
+  function measureWrap(svgEl) {
+    var g = GEO.verso.ident, wrap = null;
+    // Seuils relevés sur les cartes fournies : le bandeau du nom va jusqu'au
+    // bord du format coupé, et la plus longue adresse courriel s'arrête à
+    // 1,6 mm de ce bord.
+    var nameRoom = TRIM_W - g.band.x - g.band.padding * 2 - 0.5;
+    var roleRoom = TRIM_W - g.x - 1.6;
+
+    var names = svgEl.querySelectorAll('[class^="name-"]');
+    if (names.length === 1) {
+      try {
+        if (names[0].getComputedTextLength() > nameRoom) {
+          var split = breakPoint(names[0], nameRoom);
+          if (split) wrap = { name: split };
+        }
+      } catch (e) { return null; }
+    }
+
+    var role = svgEl.querySelector('[class^="ident-"]');
+    if (role) {
+      try {
+        if (role.getComputedTextLength() > roleRoom) {
+          var rsplit = breakPoint(role, roleRoom);
+          if (rsplit) (wrap = wrap || {}).role = rsplit;
+        }
+      } catch (e) { /* mesure indisponible */ }
+    }
+    return wrap;
+  }
+
+  /**
+   * Ajuste, une fois le SVG dans le document, ce qui demande de mesurer le
+   * texte : largeur des bandeaux rouges, resserrement des lignes de contact
+   * trop longues, et centrage du pictogramme de l'adresse.
    */
   function fitBand(svgEl) {
     if (!svgEl) return;
     var g = GEO.verso;
-    var name = svgEl.querySelector('[id^="name-"]');
-    var band = svgEl.querySelector('[id^="band-"]');
-    if (name && band) {
+
+    // Chaque bandeau épouse la ligne de nom qu'il porte.
+    var names = svgEl.querySelectorAll('[class^="name-"]');
+    Array.prototype.forEach.call(names, function (el) {
+      var band = svgEl.querySelector('rect[class^="band-"][data-line="'
+                                     + el.getAttribute('data-line') + '"]');
+      if (!band) return;
       var w = 0;
-      try { w = name.getComputedTextLength(); } catch (e) { return; }
-      band.setAttribute('width', Math.max(w + g.band.padding * 2, 4));
-      band.setAttribute('x', g.name.x - g.band.padding);
-    }
+      try { w = el.getComputedTextLength(); } catch (e) { return; }
+      band.setAttribute('width', Math.max(w + g.ident.band.padding * 2, 4));
+      band.setAttribute('x', g.ident.x - g.ident.band.padding);
+    });
+
     // Les lignes de contact se resserrent quand l'une d'elles déborde, comme
     // le fait la carte d'origine pour les adresses les plus longues.
     var rows = svgEl.querySelectorAll('[class^="row-"]');
@@ -240,7 +341,7 @@
           widest = Math.max(widest, el.getComputedTextLength());
         });
       } catch (e) { widest = 0; }
-      var room = TRIM_W - g.rows.textX - 4.5;   // marge droite comparable à la marge gauche
+      var room = TRIM_W - g.rows.textX - 1.6;
       if (widest > room) {
         var size = Math.max(g.rows.size * room / widest, g.rows.size * 0.8);
         Array.prototype.forEach.call(rows, function (el) {
@@ -254,16 +355,35 @@
     if (org && pin) {
       var ow = 0;
       try { ow = org.getComputedTextLength(); } catch (e) { return; }
-      var a = GEO.verso.address, cx = TRIM_W / 2, size = a.size * 0.95;
-      var left = cx + a.size * 0.45 - ow / 2 - a.iconGap - size;
-      var group = pin.parentNode;
-      group.setAttribute('transform', 'translate(' + f(left) + ' '
-        + f(a.baseline - size * 0.82) + ') scale(' + f(size) + ')');
+      var a = g.address, cx = TRIM_W / 2;
+      var glyph = Icons.glyphs.pin.box;
+      var drawn = (glyph[2] - glyph[0]) / Icons.UPEM * a.pinSize;
+      var left = cx + a.size * 0.45 - ow / 2 - a.iconGap - drawn;
+      var k = a.pinSize / Icons.UPEM;
+      pin.parentNode.setAttribute('transform', 'translate(' + f(left) + ' '
+        + f(a.baseline + a.pinDrop) + ') scale(' + k.toFixed(6) + ' ' + (-k).toFixed(6) + ')');
     }
+  }
+
+  /**
+   * Pose le verso dans un élément du document : un premier rendu sert à
+   * mesurer le texte, un second applique les coupures qui en découlent, puis
+   * les ajustements de détail. C'est le seul chemin qui produit une mise en
+   * page juste — le rendu direct ne sait pas ce que mesure le texte.
+   */
+  function backInto(host, d, opts) {
+    opts = opts || {};
+    host.innerHTML = renderBack(d, opts);
+    var wrap = measureWrap(host.firstElementChild);
+    if (wrap) {
+      host.innerHTML = renderBack(d, Object.assign({}, opts, { wrap: wrap }));
+    }
+    fitBand(host.firstElementChild);
+    return host.firstElementChild;
   }
 
   global.Card = {
     TRIM_W: TRIM_W, TRIM_H: TRIM_H, BLEED: BLEED,
-    front: renderFront, back: renderBack, fitBand: fitBand
+    front: renderFront, back: renderBack, backInto: backInto, fitBand: fitBand
   };
 }(window));

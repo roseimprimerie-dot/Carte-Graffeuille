@@ -102,8 +102,7 @@
 
     var front = $('#preview-front'), back = $('#preview-back');
     front.innerHTML = Card.front(view, { bleed: state.bleed, marks: state.bleed });
-    back.innerHTML = Card.back(view, { bleed: state.bleed, marks: state.bleed });
-    Card.fitBand(back.firstElementChild);
+    Card.backInto(back, view, { bleed: state.bleed, marks: state.bleed });
 
     // Le format de page suit l'option de fond perdu.
     var w = Card.TRIM_W + (state.bleed ? Card.BLEED * 2 : 0);
@@ -254,14 +253,16 @@
   function sideSvg(side, withFont) {
     var opts = { bleed: state.bleed, marks: state.bleed };
     var view = Object.assign({}, state, { qrPayload: Contact.cardUrl(siteRoot(state), state) });
-    var markup = side === 'front' ? Card.front(view, opts) : Card.back(view, opts);
-    if (side === 'back') {
-      // Le bandeau est ajusté sur un rendu hors écran, puis resérialisé.
+    var markup;
+    if (side === 'front') {
+      markup = Card.front(view, opts);
+    } else {
+      // Le verso se compose à partir du texte mesuré : on le pose hors écran,
+      // puis on resérialise le résultat.
       var host = document.createElement('div');
       host.style.cssText = 'position:fixed;left:-9999px;top:0;width:200mm';
-      host.innerHTML = markup;
       document.body.appendChild(host);
-      Card.fitBand(host.firstElementChild);
+      Card.backInto(host, view, opts);
       markup = host.innerHTML;
       host.remove();
     }
@@ -394,7 +395,7 @@
       // Tout ce qui appartient à une personne repart à zéro — l'identifiant
       // surtout : conservé, il ferait écraser le dossier du précédent.
       writeForm(Object.assign({}, DEFAULTS, {
-        firstName: '', lastName: '', role: '', phone: '',
+        firstName: '', lastName: '', role: '', department: '', phone: '',
         email: '', email2: '', slug: '', photo: '',
         siteBase: form.elements.siteBase.value
       }));

@@ -1,10 +1,10 @@
 {
-  "firstName": "Fabrice",
-  "lastName": "Pellizotti",
-  "role": "Commercial",
-  "department": "Boîtes de vitesses / Ponts",
-  "phone": "07 86 77 55 91",
-  "email": "fabrice@graffeuille.com",
+  "firstName": "Mickaël",
+  "lastName": "Morel",
+  "role": "Responsable commercial",
+  "department": "Moteurs",
+  "phone": "06 42 97 37 40",
+  "email": "mickael@graffeuille.com",
   "email2": "",
   "website": "www.graffeuille.fr",
   "websiteInContacts": false,
@@ -18,6 +18,6 @@
   "accent": "#e63329",
   "qrLevel": "M",
   "watermark": true,
-  "slug": "fabrice-pellizotti",
+  "slug": "mickael-morel",
   "photo": ""
 }

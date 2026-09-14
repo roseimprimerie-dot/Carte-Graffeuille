@@ -10,6 +10,7 @@ window.Contact = (function () {
     firstName: 'Jérôme',
     lastName: 'Goumard',
     role: 'Directeur',
+    department: '',
     phone: '06 42 97 36 94',
     email: 'jerome@graffeuille.com',
     email2: '',
@@ -43,7 +44,7 @@ window.Contact = (function () {
                 'tagline', 'accent',
                 // Ajouts ultérieurs : toujours en fin de liste, pour que les QR
                 // déjà imprimés continuent de se lire.
-                'email2'];
+                'email2', 'department'];
 
   function normalise(d) {
     var out = Object.assign({}, DEFAULTS, d || {});
@@ -92,7 +93,8 @@ window.Contact = (function () {
     ];
     if (d.company) lines.push('ORG:' + d.company);
     // TITLE ne tient que sur une ligne, là où la carte imprimée peut en avoir deux.
-    if (d.role) lines.push('TITLE:' + d.role.split('\n').join(' — '));
+    var title = [d.role, d.department].filter(Boolean).join(' — ').split('\n').join(' ');
+    if (title) lines.push('TITLE:' + title);
     if (d.phone) lines.push('TEL;TYPE=CELL:' + d.phone.replace(/\s+/g, ''));
     if (d.street || d.city) {
       lines.push('ADR;TYPE=WORK:;;' + (d.street || '') + ';' + (d.city || '') + ';;'

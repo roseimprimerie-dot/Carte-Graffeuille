@@ -2,6 +2,7 @@
   "firstName": "Jérôme",
   "lastName": "Goumard",
   "role": "Directeur",
+  "department": "",
   "phone": "06 42 97 36 94",
   "email": "jerome@graffeuille.com",
   "email2": "",
@@ -17,7 +18,6 @@
   "accent": "#e63329",
   "qrLevel": "M",
   "watermark": true,
-  "bleed": false,
   "slug": "jerome-goumard",
   "photo": ""
 }

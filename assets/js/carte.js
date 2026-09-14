@@ -79,7 +79,8 @@
             + esc(name) + '" width="96" height="96" loading="eager">'
           : '')
       + '<h1 class="name">' + esc(name) + '</h1>'
-      + (d.role ? '<p class="role">' + esc(d.role) + '</p>' : '');
+      + (d.role ? '<p class="role">' + esc(d.role) + '</p>' : '')
+      + (d.department ? '<p class="department">' + esc(d.department) + '</p>' : '');
   }
 
   function row(icon, label, value, href, attrs) {
