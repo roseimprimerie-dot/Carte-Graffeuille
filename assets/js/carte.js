@@ -93,7 +93,7 @@
   function renderLinks(d) {
     var out = [];
     if (d.phone) {
-      out.push(row('phone', 'Téléphone', d.phone, 'tel:' + d.phone.replace(/\s+/g, '')));
+      out.push(row('phone', 'Téléphone', d.phone, 'tel:' + Contact.e164(d.phone)));
     }
     Contact.emails(d).forEach(function (address, i) {
       out.push(row('mail', i === 0 ? 'Courriel' : 'Autre courriel',
