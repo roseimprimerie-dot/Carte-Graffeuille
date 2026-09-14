@@ -1,6 +1,6 @@
 # Cartes de visite dynamique - GRAFFEUILLE
 
-Deux pages, un seul dépôt :
+Toutes les cartes, un seul dépôt :
 
 | Page | À qui elle s'adresse |
 | --- | --- |
