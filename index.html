@@ -2,207 +2,44 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cartes de visite GRAFFEUILLE</title>
-<meta name="description" content="Éditeur en ligne des cartes de visite GRAFFEUILLE / Turgis Gaillard : format 54 × 85 mm, QR vCard généré automatiquement, export PDF, SVG, PNG et .vcf.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Carte de visite GRAFFEUILLE</title>
+<meta name="description" content="Coordonnées professionnelles GRAFFEUILLE / Turgis Gaillard.">
+<meta name="theme-color" content="#e63329">
+<meta name="robots" content="noindex">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap">
-<link rel="stylesheet" href="assets/css/app.css">
-<style id="print-page">@page { margin: 0; size: 54mm 85mm; }</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Inter:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<link rel="stylesheet" href="assets/css/carte.css">
 </head>
 <body>
 
-<header class="topbar">
-  <h1><span class="dot"></span> Cartes de visite <small>GRAFFEUILLE · Turgis Gaillard</small></h1>
-  <div class="spacer"></div>
-  <div class="topbar-actions">
-    <button type="button" id="btn-new" class="ghost">Nouvelle carte</button>
-    <button type="button" id="btn-share" class="ghost">Copier le lien</button>
-    <button type="button" id="btn-save" class="primary">Enregistrer</button>
+<main class="sheet" id="card" hidden>
+  <header class="crest" id="crest"></header>
+
+  <section class="identity" id="identity"></section>
+
+  <nav class="links" id="links" aria-label="Coordonnées"></nav>
+
+  <div class="actions">
+    <a class="cta" id="btn-vcf" href="#">Ajouter à mes contacts</a>
+    <button type="button" class="secondary" id="btn-share">Partager cette carte</button>
   </div>
-</header>
 
-<main class="layout">
-
-  <!-- ------------------------------------------------------------ formulaire -->
-  <form class="form-col" id="form" autocomplete="off">
-
-    <section class="panel">
-      <h2>Titulaire de la carte</h2>
-      <div class="panel-body">
-        <div class="grid">
-          <div class="field">
-            <label for="firstName">Prénom</label>
-            <input type="text" id="firstName" name="firstName" placeholder="Jérôme">
-          </div>
-          <div class="field">
-            <label for="lastName">Nom</label>
-            <input type="text" id="lastName" name="lastName" placeholder="GOUMARD">
-            <span class="hint">Affiché en capitales sur la carte.</span>
-          </div>
-          <div class="field full">
-            <label for="role">Fonction</label>
-            <input type="text" id="role" name="role" placeholder="Directeur Adjoint">
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>Coordonnées</h2>
-      <div class="panel-body">
-        <div class="grid">
-          <div class="field">
-            <label for="phone">Téléphone</label>
-            <input type="tel" id="phone" name="phone" placeholder="06 42 97 36 94">
-          </div>
-          <div class="field">
-            <label for="email">Courriel</label>
-            <input type="email" id="email" name="email" placeholder="prenom@graffeuille.com">
-          </div>
-          <div class="field full">
-            <label for="website">Site internet</label>
-            <input type="url" id="website" name="website" placeholder="www.defense-securite.graffeuille.com">
-          </div>
-          <div class="field full">
-            <label class="check">
-              <input type="checkbox" id="websiteInContacts" name="websiteInContacts">
-              Ajouter aussi le site dans le bloc de contact (sous le courriel)
-            </label>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>Établissement</h2>
-      <div class="panel-body">
-        <div class="grid">
-          <div class="field full">
-            <label for="company">Raison sociale</label>
-            <input type="text" id="company" name="company" placeholder="GRAFFEUILLE">
-          </div>
-          <div class="field full">
-            <label for="street">Adresse</label>
-            <input type="text" id="street" name="street" placeholder="Rte de Saint-Jean d’Angély">
-          </div>
-          <div class="field">
-            <label for="postalCode">Code postal</label>
-            <input type="text" id="postalCode" name="postalCode" placeholder="16170">
-          </div>
-          <div class="field">
-            <label for="city">Ville</label>
-            <input type="text" id="city" name="city" placeholder="Rouillac">
-          </div>
-          <div class="field full">
-            <label for="country">Pays</label>
-            <input type="text" id="country" name="country" placeholder="France">
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>Recto</h2>
-      <div class="panel-body">
-        <div class="grid">
-          <div class="field full">
-            <label for="tagline">Accroche</label>
-            <textarea id="tagline" name="tagline" rows="2"
-              placeholder="Reconditionnement de moteurs,&#10;de boîtes de vitesses et de ponts."></textarea>
-            <span class="hint">Une ligne de texte par ligne saisie. Laisser vide pour un recto sans accroche.</span>
-          </div>
-          <div class="field full">
-            <label class="check">
-              <input type="checkbox" id="showBaseline" name="showBaseline">
-              Afficher la signature « Turgis Gaillard » sous le logo
-            </label>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>Apparence &amp; impression</h2>
-      <div class="panel-body">
-        <div class="grid">
-          <div class="field">
-            <label for="accent">Couleur d’accent</label>
-            <input type="color" id="accent" name="accent" value="#e63329">
-            <div class="swatches" id="swatches"></div>
-          </div>
-          <div class="field">
-            <label for="qrLevel">Correction d’erreur du QR</label>
-            <select id="qrLevel" name="qrLevel">
-              <option value="L">L — 7 % (code le plus léger)</option>
-              <option value="M" selected>M — 15 % (recommandé)</option>
-              <option value="Q">Q — 25 %</option>
-              <option value="H">H — 30 % (le plus robuste)</option>
-            </select>
-          </div>
-          <div class="field full">
-            <label class="check">
-              <input type="checkbox" id="watermark" name="watermark">
-              Filigrane du symbole au verso
-            </label>
-            <label class="check">
-              <input type="checkbox" id="bleed" name="bleed">
-              Fond perdu de 5 mm et traits de coupe (fichier pour l’imprimeur)
-            </label>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel">
-      <h2>Annuaire</h2>
-      <div class="panel-body">
-        <div class="roster" id="roster"></div>
-        <div class="exports">
-          <button type="button" id="btn-export-json" class="ghost">Exporter l’annuaire (.json)</button>
-          <button type="button" id="btn-import-json" class="ghost">Importer un annuaire</button>
-          <input type="file" id="file-json" accept="application/json,.json" hidden>
-        </div>
-      </div>
-    </section>
-  </form>
-
-  <!-- --------------------------------------------------------------- aperçu -->
-  <div class="preview-col">
-    <div class="preview-stage">
-      <div class="cards">
-        <figure class="card-slot" style="margin:0">
-          <div id="preview-front"></div>
-          <figcaption>Recto</figcaption>
-        </figure>
-        <figure class="card-slot" style="margin:0">
-          <div id="preview-back"></div>
-          <figcaption>Verso</figcaption>
-        </figure>
-      </div>
-    </div>
-
-    <div class="preview-tools">
-      <div class="exports">
-        <button type="button" id="btn-print" class="primary">Imprimer / PDF</button>
-        <button type="button" id="btn-vcf">Fiche contact .vcf</button>
-        <button type="button" id="btn-svg">SVG</button>
-        <button type="button" id="btn-png">PNG 600 dpi</button>
-      </div>
-      <p class="notice" id="embedded-notice" hidden></p>
-      <p class="meta" id="meta"></p>
-    </div>
-  </div>
+  <footer class="foot" id="foot"></footer>
 </main>
 
-<div id="print-area" aria-hidden="true"></div>
+<section class="sheet missing" id="missing" hidden>
+  <h1>Carte introuvable</h1>
+  <p id="missing-text"></p>
+</section>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="assets/js/qrcode.js"></script>
+<script src="assets/js/icons.js"></script>
 <script src="assets/js/logo.js"></script>
-<script src="assets/js/card.js"></script>
-<script src="assets/js/app.js"></script>
+<script src="assets/js/contact.js"></script>
+<script src="assets/js/carte.js"></script>
 </body>
 </html>
