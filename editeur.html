@@ -136,11 +136,19 @@
               À renseigner avant d’imprimer : le QR pointe vers cette adresse.</span>
           </div>
           <div class="field full">
-            <label for="slug">Identifiant court</label>
-            <input type="text" id="slug" name="slug" placeholder="jerome-goumard">
-            <span class="hint">Donne une URL courte, donc un QR bien plus lisible.
-              Demande de déposer la fiche dans le dossier <code>cartes/</code> du site.
-              Laisser vide pour que le QR porte lui-même les coordonnées.</span>
+            <label for="slug">Identifiant de la personne</label>
+            <input type="text" id="slug" name="slug" placeholder="prenom-nom">
+            <span class="hint">Donne à la personne son adresse propre,
+              <code>…/equipe/prenom-nom/</code> : une URL courte, donc un QR bien
+              plus lisible. Laisser vide pour que le QR porte lui-même les
+              coordonnées.</span>
+          </div>
+          <div class="field full">
+            <label for="photo">Photo du dossier</label>
+            <input type="text" id="photo" name="photo" placeholder="photo.jpg">
+            <span class="hint">Nom du fichier image déposé dans le dossier de la
+              personne. Elle apparaît sur la page en ligne seulement — la carte
+              imprimée n’en porte pas.</span>
           </div>
           <div class="field full">
             <p class="notice" id="qr-target"></p>

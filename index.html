@@ -14,29 +14,9 @@
 <link rel="stylesheet" href="assets/css/carte.css">
 </head>
 <body>
-
-<main class="sheet" id="card" hidden>
-  <header class="crest" id="crest"></header>
-
-  <section class="identity" id="identity"></section>
-
-  <nav class="links" id="links" aria-label="Coordonnées"></nav>
-
-  <div class="actions">
-    <a class="cta" id="btn-vcf" href="#">Ajouter à mes contacts</a>
-    <button type="button" class="secondary" id="btn-share">Partager cette carte</button>
-  </div>
-
-  <footer class="foot" id="foot"></footer>
-</main>
-
-<section class="sheet missing" id="missing" hidden>
-  <h1>Carte introuvable</h1>
-  <p id="missing-text"></p>
-</section>
-
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
-
+<!-- Page d'entrée : elle affiche la personne désignée par le fragment d'URL
+     (#prenom-nom, ou #c=<coordonnées>). Chaque employé a par ailleurs sa propre
+     adresse dans equipe/<identifiant>/, et c'est celle-là que visent les QR. -->
 <script src="assets/js/icons.js"></script>
 <script src="assets/js/logo.js"></script>
 <script src="assets/js/contact.js"></script>
