@@ -420,6 +420,17 @@
       e.target.value = '';
     });
 
+    // Dans un aperçu intégré, le navigateur bloque l'impression et les
+    // téléchargements déclenchés par la page : on le dit plutôt que de laisser
+    // les boutons rester sans effet.
+    if (window.top !== window.self) {
+      var notice = $('#embedded-notice');
+      notice.textContent = 'Aperçu intégré : la saisie et l’aperçu fonctionnent, '
+        + 'mais le navigateur y bloque l’impression et les téléchargements. '
+        + 'Ouvrez la page dans un onglet pour récupérer le PDF, le SVG, le PNG ou la fiche .vcf.';
+      notice.hidden = false;
+    }
+
     // Les fontes web décalent la largeur du bandeau : on recalcule au chargement.
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(render);
   }
