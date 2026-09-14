@@ -98,6 +98,9 @@ body {
 
 button, .btn {
   font: inherit;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
   font-size: 13.5px;
   font-weight: 500;
   padding: 7px 13px;
@@ -365,6 +368,12 @@ input[type="color"] {
  * millimètre sur la carte, avec ou sans fond perdu.
  */
 #print-area { display: none; }
+
+#qr-target strong {
+  font-weight: 500;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
 
 @media print {
   body { background: #fff; }

@@ -1,14 +1,44 @@
+# Cartes de visite GRAFFEUILLE
 # Cartes de visite GRAFFEUILLE - éditeur en ligne
 
-Application web qui reproduit à l'identique la carte de visite **GRAFFEUILLE /
-Turgis Gaillard** et permet de la modifier pour n'importe quel collaborateur :
-on saisit les coordonnées dans un formulaire, l'aperçu recto/verso se met à jour
-en direct, le QR code est régénéré, puis on exporte un fichier prêt pour
-l'imprimeur.
+Deux pages, un seul dépôt :
+
+| Page | À qui elle s'adresse |
+| --- | --- |
+| `index.html` | **La carte en ligne.** C'est elle qui s'ouvre quand on scanne le QR code au dos de la carte imprimée. Elle ne montre que les coordonnées, sur une page pensée pour un téléphone. |
+| `editeur.html` | **L'atelier.** On y saisit les coordonnées, on voit la carte se composer, on exporte le fichier d'impression. Aucune page publique n'y renvoie. |
 
 Tout tourne dans le navigateur : pas de serveur, pas de compte, pas de
-dépendance externe. Le dossier peut être déposé tel quel sur GitHub Pages ou
-ouvert directement depuis le disque.
+dépendance externe. Le dossier se dépose tel quel sur GitHub Pages.
+
+## Ce que voit la personne qui scanne
+
+Le QR code ne contient plus la fiche elle-même mais **l'adresse de la page en
+ligne**. La différence compte : corriger un numéro sur le site met à jour
+toutes les cartes déjà distribuées, alors qu'un QR contenant une vCard fige les
+coordonnées à l'encre.
+
+La page affiche le logo, le nom, la fonction, puis quatre lignes que l'on
+touche du pouce : appeler, écrire, ouvrir le site, ouvrir l'itinéraire. Le
+bouton « Ajouter à mes contacts » télécharge la fiche `.vcf`. Rien d'autre —
+aucun lien vers l'éditeur.
+
+### Deux façons de désigner une personne
+
+Le fragment de l'URL porte l'information :
+
+- `…/#jerome-goumard` — **identifiant court.** La page lit
+  `cartes/jerome-goumard.json`. L'URL fait 70 caractères, le QR tombe en
+  version 5 : ses modules mesurent **0,54 mm** une fois imprimés, donc il se
+  scanne sans effort. C'est la voie à privilégier ; elle demande de déposer la
+  fiche dans `cartes/` (bouton « Fiche pour le site » de l'éditeur).
+- `…/#c=<données>` — **coordonnées portées par l'URL.** Rien à déposer, mais
+  l'adresse atteint ~380 caractères et le QR descend à ~0,26 mm par module,
+  ce qui devient juste pour un tirage à 24 mm.
+
+L'éditeur affiche en continu l'URL visée, la version du QR et la taille de
+module obtenue, avec un verdict explicite : on voit tout de suite si le code
+sera confortable à scanner ou trop dense.
 
 ## Fidélité au modèle d'origine
 
@@ -26,70 +56,80 @@ La géométrie et les tracés proviennent du fichier d'impression fourni
 
 Les deux fontes du fichier d'origine (Author et Roobert) sont sous licence
 commerciale et ne sont donc pas redistribuées ici : la mise en page utilise
-**Inter**, un grotesque libre de métriques voisines. Pour un tirage
-professionnel, l'imprimeur peut substituer la fonte de marque dans le SVG
-exporté.
+**Inter**, un grotesque libre de métriques voisines, et **Archivo** pour les
+titres de la page publique. Pour un tirage professionnel, l'imprimeur peut
+substituer la fonte de marque dans le SVG exporté.
 
-## Fonctionnalités
+## L'éditeur
 
 - **Édition en direct** — identité, fonction, coordonnées, établissement,
   accroche du recto, couleur d'accent, filigrane.
-- **QR code vCard régénéré à chaque frappe** — il porte toujours les
-  coordonnées réellement affichées, jamais une version périmée.
-- **Annuaire local** — plusieurs cartes enregistrées dans le navigateur,
-  exportables et réimportables en JSON pour être partagées avec un collègue.
-- **Lien de partage** — l'intégralité de la carte est encodée dans le fragment
-  de l'URL ; le lien s'ouvre déjà rempli, sans rien stocker côté serveur.
-- **Exports** :
-  - `Imprimer / PDF` — deux pages vectorielles au format exact, avec ou sans
-    fond perdu selon l'option cochée ;
-  - `SVG` — recto et verso séparés, vectoriels, ouvrables dans Illustrator ou
-    Inkscape ;
-  - `PNG 600 dpi` — 1276 × 2008 px, pour le web et les signatures de courriel ;
-  - `.vcf` — la fiche contact seule.
+- **Annuaire local** — plusieurs cartes gardées dans le navigateur,
+  exportables et réimportables en JSON.
+- **Lien de partage** — l'état complet de l'éditeur tient dans le fragment
+  d'URL, pour reprendre une carte sur un autre poste.
+- **Exports** : impression PDF (deux pages vectorielles au format exact),
+  SVG recto et verso, PNG 600 dpi, fiche `.vcf`, et la fiche `.json` à déposer
+  dans `cartes/`.
 
-### Imprimer au bon format
+### Avant d'imprimer
 
-Cocher **« Fond perdu de 5 mm et traits de coupe »** avant d'exporter le
-fichier destiné à l'imprimeur. Dans la boîte de dialogue d'impression, choisir
-« Enregistrer au format PDF », des marges **nulles** et désactiver
-« Ajuster à la page » : le format de page est déjà imposé par la feuille de
-style (`54 × 85 mm`, ou `64 × 95 mm` avec le fond perdu).
+1. Renseigner **« Adresse du site publié »** avec le domaine réel. Sur GitHub
+   Pages ce champ peut rester vide : l'éditeur déduit l'adresse de l'endroit
+   d'où il est servi.
+2. Donner un **identifiant court**, puis déposer la fiche `.json` produite dans
+   `cartes/`.
+3. Vérifier le verdict affiché sous l'URL (taille de module).
+4. Cocher **« Fond perdu de 5 mm et traits de coupe »**, puis imprimer avec des
+   marges nulles et sans « ajuster à la page » — le format est déjà imposé par
+   la feuille de style.
+
+### L'éditeur n'est pas protégé
+
+`editeur.html` est simplement absent de la navigation : aucun lien public n'y
+mène et il porte un `noindex`. Sur un hébergement statique il n'y a pas
+d'authentification possible, donc **quiconque connaît l'adresse peut l'ouvrir**.
+Il ne peut rien casser (il ne fait qu'écrire dans le navigateur de la personne),
+mais si cela pose problème, il faut le servir depuis un dépôt privé ou un
+hébergement qui sait demander un mot de passe.
 
 ## Organisation du code
 
 ```
-index.html              formulaire et aperçu
-assets/css/app.css      interface (thème clair et sombre) et règles d'impression
-assets/js/qrcode.js     encodeur QR autonome (ISO/IEC 18004, mode octet)
+index.html              carte publique (mobile)
+editeur.html            atelier de composition
+cartes/*.json           une fiche par personne, servie par l'identifiant court
+
+assets/js/contact.js    modèle partagé : valeurs, vCard, encodage de l'URL
+assets/js/icons.js      pictogrammes communs aux deux pages
 assets/js/logo.js       tracés du logo, en millimètres dans le repère de la carte
-assets/js/card.js       rendu SVG du recto et du verso, génération de la vCard
-assets/js/app.js        formulaire, annuaire, partage, exports
+assets/js/carte.js      page publique
+assets/js/card.js       rendu SVG du recto et du verso
+assets/js/qrcode.js     encodeur QR autonome (ISO/IEC 18004, mode octet)
+assets/js/app.js        éditeur : formulaire, annuaire, exports
+assets/css/carte.css    page publique (thèmes clair et sombre)
+assets/css/app.css      éditeur et règles d'impression
 assets/img/             logo et symbole en SVG, réutilisables hors de la carte
 ```
 
-`card.js` est le seul endroit qui décrit la mise en page : l'aperçu, le PDF, le
-SVG et le PNG sortent tous du même rendu, il n'y a donc pas de risque de
-divergence entre l'écran et l'impression.
+`card.js` est le seul endroit qui décrit la mise en page imprimée : l'aperçu,
+le PDF, le SVG et le PNG sortent tous du même rendu. `contact.js` est le seul
+endroit qui décrit les données, partagé par les deux pages.
 
-L'encodeur QR est écrit à la main plutôt qu'importé d'un CDN, pour que la carte
-reste utilisable hors ligne et sans dépendance à surveiller. Il a été vérifié
-par relecture des codes produits (29 combinaisons de niveaux L/M/Q/H et de
-versions 1 à 39, toutes relues correctement), y compris sur une capture du
-rendu réel de la carte.
+L'encodeur QR est écrit à la main plutôt qu'importé d'un CDN, pour que les
+pages restent utilisables hors ligne et sans dépendance à surveiller. Il a été
+vérifié par relecture des codes produits (29 combinaisons de niveaux L/M/Q/H et
+de versions 1 à 39, toutes relues correctement), puis sur des captures du rendu
+réel de la carte, avec identifiant court et avec coordonnées en URL.
 
 ## Mise en ligne
 
 Aucune compilation : `Settings → Pages → Deploy from a branch`, en pointant sur
-la racine du dépôt. En local, n'importe quel serveur statique suffit :
+la racine du dépôt. En local :
 
 ```sh
 python3 -m http.server 8000
 ```
 
-## Compatibilité
-
-Navigateurs de bureau et mobiles récents. L'annuaire s'appuie sur le stockage
-local du navigateur : il reste sur le poste, et l'export JSON sert à le
-transmettre. Si le stockage est indisponible (navigation privée), l'éditeur et
-les exports continuent de fonctionner, seule la sauvegarde est désactivée.
+`http://localhost:8000/` ouvre la carte, `http://localhost:8000/editeur.html`
+l'atelier.

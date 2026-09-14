@@ -1,0 +1,270 @@
+/* carte.css — page publique de la carte de visite, pensée pour un téléphone
+ * qui vient de scanner le QR code du dos de la carte imprimée. */
+
+:root {
+  color-scheme: light;
+  --accent: #e63329;
+  --accent-deep: #b81f17;
+  --on-accent: #ffffff;
+
+  /* Neutres très légèrement tirés vers le rouge de la marque, pour qu'ils
+   * s'accordent à l'aplat du bandeau plutôt que de jurer avec lui. */
+  --ground: #f6f3f2;
+  --surface: #ffffff;
+  --surface-2: #faf8f7;
+  --ink: #1b1513;
+  --ink-muted: #6c615d;
+  --hairline: #e7e0dd;
+  --ring: rgba(230, 51, 41, .35);
+  --lift: 0 1px 2px rgba(27, 21, 19, .05), 0 10px 30px rgba(27, 21, 19, .08);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #141110;
+    --surface: #1e1a19;
+    --surface-2: #262120;
+    --ink: #f5f1ef;
+    --ink-muted: #a49b97;
+    --hairline: #322b29;
+    --lift: 0 1px 2px rgba(0, 0, 0, .5), 0 10px 30px rgba(0, 0, 0, .45);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #141110;
+  --surface: #1e1a19;
+  --surface-2: #262120;
+  --ink: #f5f1ef;
+  --ink-muted: #a49b97;
+  --hairline: #322b29;
+  --lift: 0 1px 2px rgba(0, 0, 0, .5), 0 10px 30px rgba(0, 0, 0, .45);
+}
+
+* { box-sizing: border-box; }
+
+/* .sheet impose un display : il faut le neutraliser explicitement,
+ * sinon l'attribut hidden reste sans effet. */
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font: 16px/1.5 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.sheet {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: var(--surface);
+  box-shadow: var(--lift);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ------------------------------------------------------------------ bandeau
+ * Reprend le recto imprimé : aplat rouge, logo, accroche, et le symbole
+ * détouré en filigrane comme au verso de la carte. */
+
+.crest {
+  position: relative;
+  overflow: hidden;
+  background: var(--accent);
+  color: var(--on-accent);
+  padding: 30px 24px 26px;
+}
+
+.crest-watermark {
+  position: absolute;
+  right: -34%;
+  bottom: -58%;
+  width: 115%;
+  opacity: .2;
+  pointer-events: none;
+}
+
+.crest-logo { position: relative; display: block; width: 172px; max-width: 62%; }
+
+.crest-pitch {
+  position: relative;
+  margin: 20px 0 0;
+  max-width: 30ch;
+  font-size: 14px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, .92);
+  white-space: pre-line;
+}
+
+/* ----------------------------------------------------------------- identité
+ * Le nom reprend littéralement le bandeau rouge du verso imprimé : c'est le
+ * détail que reconnaît la personne qui vient de scanner la carte. */
+
+.identity { padding: 26px 24px 4px; }
+
+.name {
+  display: inline-block;
+  margin: 0;
+  padding: 5px 9px 6px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: 'Archivo', 'Inter', Helvetica, Arial, sans-serif;
+  font-size: clamp(21px, 6.4vw, 27px);
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -.01em;
+  text-wrap: balance;
+}
+
+.role {
+  margin: 12px 0 0;
+  font-size: 16px;
+  font-style: italic;
+  color: var(--ink-muted);
+}
+
+/* --------------------------------------------------------------- contacts */
+
+.links {
+  display: flex;
+  flex-direction: column;
+  padding: 22px 16px 0;
+  gap: 2px;
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 8px;
+  border-radius: 10px;
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid var(--hairline);
+  transition: background .12s;
+}
+.link:last-child { border-bottom: 0; }
+.link:hover { background: var(--surface-2); }
+.link:active { background: var(--hairline); }
+
+.link .ico {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+}
+
+.link .body { flex: 1 1 auto; min-width: 0; }
+
+.link .value {
+  display: block;
+  font-size: 16px;
+  font-weight: 550;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+.link .label {
+  display: block;
+  margin-top: 1px;
+  font-size: 12px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.link .chev { flex: 0 0 auto; color: var(--ink-muted); opacity: .7; }
+
+/* -------------------------------------------------------------- actions */
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 26px 24px 8px;
+}
+
+.cta, .secondary {
+  font: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  padding: 15px 18px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background .12s, border-color .12s, transform .06s;
+}
+
+.cta { background: var(--accent); color: var(--on-accent); }
+.cta:hover { background: var(--accent-deep); }
+.cta:active { transform: translateY(1px); }
+
+.secondary {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--hairline);
+  font-weight: 500;
+}
+.secondary:hover { background: var(--surface-2); }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* ------------------------------------------------------------------- pied */
+
+.foot {
+  margin-top: auto;
+  padding: 28px 24px 34px;
+  border-top: 1px solid var(--hairline);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+
+.foot .org {
+  font-family: 'Archivo', 'Inter', Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--ink);
+}
+
+.foot a { color: var(--ink-muted); }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%) translateY(10px);
+  max-width: calc(100vw - 32px);
+  background: var(--ink);
+  color: var(--surface);
+  font-size: 14px;
+  padding: 11px 18px;
+  border-radius: 999px;
+  box-shadow: var(--lift);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .18s, transform .18s;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.missing { padding: 40px 24px; }
+.missing h1 { font-family: 'Archivo', 'Inter', sans-serif; font-size: 20px; margin: 0 0 8px; }
+.missing p { margin: 0; color: var(--ink-muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
