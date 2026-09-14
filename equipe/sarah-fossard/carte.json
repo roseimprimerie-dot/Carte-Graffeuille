@@ -1,0 +1,23 @@
+{
+  "firstName": "Sarah",
+  "lastName": "Fossard",
+  "role": "Commerciale",
+  "department": "Grands Comptes",
+  "phone": "05 45 96 44 78",
+  "email": "sfossard@graffeuille.com",
+  "email2": "defense-securite@graffeuille.com",
+  "website": "www.graffeuille.fr",
+  "websiteInContacts": false,
+  "company": "GRAFFEUILLE",
+  "street": "120, route de Saint-Jean d’Angély",
+  "postalCode": "16170",
+  "city": "Rouillac",
+  "country": "France",
+  "tagline": "Reconditionnement de moteurs,\nde boîtes de vitesses et de ponts.",
+  "showBaseline": true,
+  "accent": "#e63329",
+  "qrLevel": "M",
+  "watermark": true,
+  "slug": "sarah-fossard",
+  "photo": ""
+}

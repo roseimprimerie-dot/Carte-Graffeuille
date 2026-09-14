@@ -1,0 +1,23 @@
+{
+  "firstName": "Alain",
+  "lastName": "Graffeuille",
+  "role": "Directeur",
+  "department": "",
+  "phone": "06 80 68 90 09",
+  "email": "info@graffeuille.com",
+  "email2": "",
+  "website": "www.graffeuille.fr",
+  "websiteInContacts": false,
+  "company": "GRAFFEUILLE",
+  "street": "120, route de Saint-Jean d’Angély",
+  "postalCode": "16170",
+  "city": "Rouillac",
+  "country": "France",
+  "tagline": "Reconditionnement de moteurs,\nde boîtes de vitesses et de ponts.",
+  "showBaseline": true,
+  "accent": "#e63329",
+  "qrLevel": "M",
+  "watermark": true,
+  "slug": "alain-graffeuille",
+  "photo": ""
+}

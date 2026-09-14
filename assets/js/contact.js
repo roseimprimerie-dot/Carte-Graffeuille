@@ -10,8 +10,10 @@ window.Contact = (function () {
     firstName: 'Jérôme',
     lastName: 'Goumard',
     role: 'Directeur',
+    department: '',
     phone: '06 42 97 36 94',
     email: 'jerome@graffeuille.com',
+    email2: '',
     website: 'www.graffeuille.fr',
     websiteInContacts: false,
     company: 'GRAFFEUILLE',
@@ -25,7 +27,8 @@ window.Contact = (function () {
     qrLevel: 'M',
     watermark: true,
     bleed: false,
-    slug: ''
+    slug: '',
+    photo: ''
   };
 
   var FIELDS = Object.keys(DEFAULTS);
@@ -38,7 +41,10 @@ window.Contact = (function () {
    */
   var PACKED = ['firstName', 'lastName', 'role', 'phone', 'email', 'website',
                 'company', 'street', 'postalCode', 'city', 'country',
-                'tagline', 'accent'];
+                'tagline', 'accent',
+                // Ajouts ultérieurs : toujours en fin de liste, pour que les QR
+                // déjà imprimés continuent de se lire.
+                'email2', 'department'];
 
   function normalise(d) {
     var out = Object.assign({}, DEFAULTS, d || {});
@@ -74,6 +80,10 @@ window.Contact = (function () {
     return /^https?:\/\//i.test(d.website) ? d.website : 'https://' + d.website;
   }
 
+  function emails(d) {
+    return [d.email, d.email2].filter(Boolean);
+  }
+
   function vcard(d) {
     var lines = [
       'BEGIN:VCARD',
@@ -82,13 +92,16 @@ window.Contact = (function () {
       'FN:' + [d.firstName, d.lastName].filter(Boolean).join(' ')
     ];
     if (d.company) lines.push('ORG:' + d.company);
-    if (d.role) lines.push('TITLE:' + d.role);
+    // TITLE ne tient que sur une ligne, là où la carte imprimée peut en avoir deux.
+    var title = [d.role, d.department].filter(Boolean).join(' — ').split('\n').join(' ');
+    if (title) lines.push('TITLE:' + title);
     if (d.phone) lines.push('TEL;TYPE=CELL:' + d.phone.replace(/\s+/g, ''));
     if (d.street || d.city) {
       lines.push('ADR;TYPE=WORK:;;' + (d.street || '') + ';' + (d.city || '') + ';;'
                  + (d.postalCode || '') + ';' + (d.country || ''));
     }
     if (d.email) lines.push('EMAIL;TYPE=WORK,INTERNET:' + d.email);
+    if (d.email2) lines.push('EMAIL;TYPE=WORK,INTERNET:' + d.email2);
     if (d.website) lines.push('URL:' + websiteUrl(d));
     lines.push('END:VCARD');
     return lines.join('\r\n');
@@ -145,7 +158,7 @@ window.Contact = (function () {
   function cardUrl(base, d) {
     var root = String(base || '').replace(/(editeur\.html)?(#.*)?$/, '');
     if (!/\/$/.test(root)) root += '/';
-    return root + '#' + (d.slug ? d.slug : 'c=' + pack(d));
+    return d.slug ? root + 'equipe/' + d.slug + '/' : root + '#c=' + pack(d);
   }
 
   /** Lit le fragment d'URL d'une page publique : identifiant ou coordonnées. */
@@ -164,7 +177,7 @@ window.Contact = (function () {
     DEFAULTS: DEFAULTS, FIELDS: FIELDS, CHECKBOXES: CHECKBOXES,
     normalise: normalise, fullName: fullName, slugify: slugify,
     cityLine: cityLine, addressQuery: addressQuery, websiteUrl: websiteUrl,
-    vcard: vcard, pack: pack, unpack: unpack,
+    vcard: vcard, emails: emails, pack: pack, unpack: unpack,
     cardUrl: cardUrl, readFragment: readFragment
   };
 }());

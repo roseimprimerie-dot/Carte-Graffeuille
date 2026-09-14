@@ -102,8 +102,7 @@
 
     var front = $('#preview-front'), back = $('#preview-back');
     front.innerHTML = Card.front(view, { bleed: state.bleed, marks: state.bleed });
-    back.innerHTML = Card.back(view, { bleed: state.bleed, marks: state.bleed });
-    Card.fitBand(back.firstElementChild);
+    Card.backInto(back, view, { bleed: state.bleed, marks: state.bleed });
 
     // Le format de page suit l'option de fond perdu.
     var w = Card.TRIM_W + (state.bleed ? Card.BLEED * 2 : 0);
@@ -254,14 +253,16 @@
   function sideSvg(side, withFont) {
     var opts = { bleed: state.bleed, marks: state.bleed };
     var view = Object.assign({}, state, { qrPayload: Contact.cardUrl(siteRoot(state), state) });
-    var markup = side === 'front' ? Card.front(view, opts) : Card.back(view, opts);
-    if (side === 'back') {
-      // Le bandeau est ajusté sur un rendu hors écran, puis resérialisé.
+    var markup;
+    if (side === 'front') {
+      markup = Card.front(view, opts);
+    } else {
+      // Le verso se compose à partir du texte mesuré : on le pose hors écran,
+      // puis on resérialise le résultat.
       var host = document.createElement('div');
       host.style.cssText = 'position:fixed;left:-9999px;top:0;width:200mm';
-      host.innerHTML = markup;
       document.body.appendChild(host);
-      Card.fitBand(host.firstElementChild);
+      Card.backInto(host, view, opts);
       markup = host.innerHTML;
       host.remove();
     }
@@ -391,12 +392,16 @@
 
     $('#btn-new').addEventListener('click', function () {
       currentId = null;
+      // Tout ce qui appartient à une personne repart à zéro — l'identifiant
+      // surtout : conservé, il ferait écraser le dossier du précédent.
       writeForm(Object.assign({}, DEFAULTS, {
-        firstName: '', lastName: '', role: '', phone: '', email: ''
+        firstName: '', lastName: '', role: '', department: '', phone: '',
+        email: '', email2: '', slug: '', photo: '',
+        siteBase: form.elements.siteBase.value
       }));
       update(); drawRoster(); rememberLast();
       location.hash = '';
-      toast('Nouvelle carte : l’identité visuelle est conservée.');
+      toast('Nouvelle carte : l’entreprise et l’identité visuelle sont conservées.');
     });
 
     $('#btn-share').addEventListener('click', function () {
@@ -420,20 +425,21 @@
     $('#btn-svg').addEventListener('click', exportSvg);
     $('#btn-png').addEventListener('click', exportPng);
 
-    // Fiche d'une personne, à déposer dans le dossier cartes/ du site pour
-    // que l'identifiant court fonctionne.
+    // Fiche d'une personne : elle se dépose dans son dossier, sous le nom
+    // carte.json, à côté de l'index.html copié depuis equipe/_modele.
     $('#btn-export-card').addEventListener('click', function () {
-      var name = state.slug || slug(state);
+      var folder = state.slug || slug(state);
       if (!state.slug) {
-        form.elements.slug.value = name;
+        form.elements.slug.value = folder;
         update();
       }
-      var record = Object.assign({}, state, { slug: name });
+      var record = Object.assign({}, state, { slug: folder });
       delete record.siteBase;   // propre à ce poste, pas à la fiche
       delete record.bleed;      // réglage d'impression, pas une coordonnée
-      download(name + '.json',
+      download('carte.json',
         new Blob([JSON.stringify(record, null, 2) + '\n'], { type: 'application/json' }));
-      toast('Fiche « ' + name + '.json » à déposer dans le dossier cartes/ du site.');
+      toast('À déposer dans equipe/' + folder + '/carte.json, '
+        + 'à côté d’un index.html copié depuis equipe/_modele.');
     });
 
     $('#btn-export-json').addEventListener('click', function () {
