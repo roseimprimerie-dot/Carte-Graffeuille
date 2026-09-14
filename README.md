@@ -32,23 +32,72 @@ déclaration.
 
 ### L'équipe déjà en place
 
-| Dossier | Personne | Fonction |
-| --- | --- | --- |
-| `alain-graffeuille` | Alain GRAFFEUILLE | Directeur |
-| `jerome-goumard` | Jérôme GOUMARD | Directeur |
-| `sarah-fossard` | Sarah FOSSARD | Commerciale, Grands Comptes |
-| `fabrice-pellizotti` | Fabrice PELLIZOTTI | Commercial, Boîtes de vitesses / Ponts |
-| `jean-michel-gaisnon` | Jean-Michel GAISNON | Responsable Atelier, Production Moteurs |
-| `loic-bernard` | Loïc BERNARD | Responsable Atelier, Production Moteurs |
+| Dossier | Personne | Fonction | Service |
+| --- | --- | --- | --- |
+| `alain-graffeuille` | Alain GRAFFEUILLE | Directeur | |
+| `jerome-goumard` | Jérôme GOUMARD | Directeur | |
+| `marie-noelle-graffeuille` | Marie-Noëlle GRAFFEUILLE | Chef de projets et développement | |
+| `sarah-fossard` | Sarah FOSSARD | Commerciale | Grands Comptes |
+| `michael-mancia` | Michaël MANCIA | Responsable commercial | Boîtes de vitesses / Ponts |
+| `mickael-morel` | Mickaël MOREL | Responsable commercial | Moteurs |
+| `fabrice-pellizotti` | Fabrice PELLIZOTTI | Commercial | Boîtes de vitesses / Ponts |
+| `jean-michel-gaisnon` | Jean-Michel GAISNON | Responsable Atelier | Production Moteurs |
+| `loic-bernard` | Loïc BERNARD | Responsable Atelier | Production Moteurs |
 
-Les coordonnées sont reprises des fichiers d'impression fournis. Deux cas que
-ces cartes ont fait apparaître et que le code gère désormais :
+Toutes les coordonnées sont reprises des fichiers d'impression fournis. Le
+site est `www.graffeuille.fr` pour l'ensemble de l'équipe.
 
-- **Fonction sur deux lignes.** La seconde s'imprime en 9 pt sous la première
-  en 10 pt, comme sur les cartes d'origine.
-- **Second courriel.** Il occupe une troisième ligne de contact ; si l'une des
-  adresses est trop longue, les trois lignes se resserrent ensemble plutôt que
-  de déborder du format.
+## Le verso suit une grille
+
+Les neuf fichiers d'impression obéissent au même gabarit, relevé sur leurs
+flux de contenu :
+
+- **3,88 mm (11 pt) entre deux lignes** du bloc identité, quel que soit leur
+  rôle ; **5,88 mm** entre la dernière ligne du nom et la fonction.
+- **Un bandeau rouge par ligne de nom**, ajusté à la largeur de cette ligne.
+  Un nom trop long pour le format se coupe et prend un second bandeau.
+- **La fonction est en italique 10 pt** ; le service, sous elle, est **droit,
+  en 9 pt et d'une graisse plus légère**. Ce sont deux champs distincts dans
+  l'éditeur, pas deux lignes d'un même texte.
+- **Le bloc de contact ne descend que s'il le faut** : il reste à 53,66 mm
+  tant que l'identité ne vient pas à sa rencontre. Une adresse trop longue ne
+  déborde pas, les trois lignes se resserrent ensemble.
+
+Le code vérifie ces règles sur les neuf cartes : les lignes de base calculées
+sont identiques à celles des fichiers d'origine.
+
+## Les fontes et les pictogrammes
+
+**Les pictogrammes sont les contours exacts** de la fonte d'icônes embarquée
+dans les fichiers fournis — un téléphone mobile, un avion en papier, une
+épingle — extraits et exprimés dans le repère de la fonte, ce qui les pose sur
+la ligne de base comme le fait le PDF. Seul le globe, absent des cartes, est
+redessiné : il ne sert qu'à la ligne « site internet », facultative.
+
+**La fonte du texte est Roboto Condensed**, servie par le site. La fonte
+d'origine, Author, est sous licence commerciale et ne peut pas être
+redistribuée ; il fallait donc une remplaçante libre dont les largeurs
+correspondent, parce que la mise en page en dépend : un nom trop large se
+coupe en deux lignes et décale tout le bloc.
+
+Les largeurs de référence ont été calculées à partir des métriques embarquées
+dans les PDF, puis comparées à dix fontes libres sur dix-sept chaînes des
+cartes réelles :
+
+| Fonte | Écart médian aux largeurs d'Author |
+| --- | --- |
+| **Roboto Condensed** | **+0,4 %** |
+| Barlow Semi Condensed | −2,5 % |
+| Archivo Narrow | −3,4 % |
+| Inter | +21,8 % |
+
+Inter, utilisée jusqu'ici, composait donc tout le verso 22 % trop large. Les
+fontes sont hébergées dans `assets/fonts/` plutôt que chargées depuis un
+tiers : la mise en page dépend de la mesure du texte rendu, et une fonte de
+repli plus large ferait basculer un nom sur deux lignes.
+
+Pour un tirage, l'imprimeur peut évidemment substituer Author dans le SVG
+exporté et retrouver le fichier d'origine au trait près.
 
 ### Ajouter un employé
 
@@ -148,12 +197,14 @@ index.html              entrée de secours, pilotée par le fragment d'URL
 editeur.html            éditeur des cartes
 
 assets/js/contact.js    modèle partagé : valeurs, vCard, encodage de l'URL
-assets/js/icons.js      pictogrammes communs aux deux pages
+assets/js/icons.js      pictogrammes, extraits de la fonte d'icônes d'origine
 assets/js/logo.js       tracés du logo, en millimètres dans le repère de la carte
 assets/js/carte.js      page publique (elle construit tout le gabarit)
 assets/js/card.js       rendu SVG du recto et du verso
 assets/js/qrcode.js     encodeur QR autonome (ISO/IEC 18004, mode octet)
 assets/js/app.js        éditeur : formulaire, annuaire, exports
+assets/css/fonts.css    fontes hébergées par le site
+assets/fonts/           Roboto Condensed, Inter, Archivo (SIL OFL 1.1)
 assets/css/carte.css    page publique (thèmes clair et sombre)
 assets/css/app.css      éditeur et règles d'impression
 assets/img/             logo et symbole en SVG, réutilisables hors de la carte

@@ -1,10 +1,10 @@
 {
-  "firstName": "Fabrice",
-  "lastName": "Pellizotti",
-  "role": "Commercial",
+  "firstName": "Michaël",
+  "lastName": "Mancia",
+  "role": "Responsable commercial",
   "department": "Boîtes de vitesses / Ponts",
-  "phone": "07 86 77 55 91",
-  "email": "fabrice@graffeuille.com",
+  "phone": "06 07 04 17 86",
+  "email": "michael@graffeuille.com",
   "email2": "",
   "website": "www.graffeuille.fr",
   "websiteInContacts": false,
@@ -18,6 +18,6 @@
   "accent": "#e63329",
   "qrLevel": "M",
   "watermark": true,
-  "slug": "fabrice-pellizotti",
+  "slug": "michael-mancia",
   "photo": ""
 }

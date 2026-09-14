@@ -7,9 +7,7 @@
 <meta name="description" content="Atelier des cartes de visite GRAFFEUILLE : format 54 × 85 mm, QR pointant vers la carte en ligne, export PDF, SVG, PNG et .vcf.">
 <meta name="robots" content="noindex, nofollow">
 <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap">
+<link rel="stylesheet" href="assets/css/fonts.css">
 <link rel="stylesheet" href="assets/css/app.css">
 <style id="print-page">@page { margin: 0; size: 54mm 85mm; }</style>
 </head>
@@ -43,11 +41,16 @@
             <input type="text" id="lastName" name="lastName" placeholder="GOUMARD">
             <span class="hint">Affiché en capitales sur la carte.</span>
           </div>
-          <div class="field full">
+          <div class="field">
             <label for="role">Fonction</label>
-            <textarea id="role" name="role" rows="2" placeholder="Responsable Atelier&#10;Production Moteurs"></textarea>
-            <span class="hint">Deux lignes au maximum. La seconde s’imprime un
-              cran plus petit, comme sur les cartes existantes.</span>
+            <input type="text" id="role" name="role" placeholder="Responsable commercial">
+            <span class="hint">Se coupe sur deux lignes si elle est trop longue.</span>
+          </div>
+          <div class="field">
+            <label for="department">Service ou spécialité</label>
+            <input type="text" id="department" name="department" placeholder="Boîtes de vitesses / Ponts">
+            <span class="hint">Facultatif. S’imprime un cran plus petit sous la
+              fonction, comme sur les cartes existantes.</span>
           </div>
         </div>
       </div>
