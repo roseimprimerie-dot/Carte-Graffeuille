@@ -218,7 +218,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 26px 24px 8px;
+  padding: 26px 24px 34px;
 }
 
 .cta, .secondary {
@@ -251,26 +251,6 @@ body {
 .secondary:hover { background: var(--surface-2); }
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
-
-/* ------------------------------------------------------------------- pied */
-
-.foot {
-  margin-top: auto;
-  padding: 28px 24px 34px;
-  border-top: 1px solid var(--hairline);
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--ink-muted);
-}
-
-.foot .org {
-  font-family: 'Archivo', 'Inter', Helvetica, Arial, sans-serif;
-  font-weight: 700;
-  letter-spacing: .04em;
-  color: var(--ink);
-}
-
-.foot a { color: var(--ink-muted); }
 
 .toast {
   position: fixed;

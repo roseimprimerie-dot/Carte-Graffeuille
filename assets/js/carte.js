@@ -43,7 +43,6 @@
       +     '<a class="cta" id="btn-vcf" href="#">Ajouter à mes contacts</a>'
       +     '<button type="button" class="secondary" id="btn-share">Partager cette carte</button>'
       +   '</div>'
-      +   '<footer class="foot" id="foot"></footer>'
       + '</main>'
       + '<section class="sheet missing" id="missing" hidden>'
       +   '<h1>Carte introuvable</h1><p id="missing-text"></p>'
@@ -115,17 +114,6 @@
     $('#links').innerHTML = out.join('');
   }
 
-  function renderFoot(d) {
-    var site = Contact.websiteUrl(d);
-    $('#foot').innerHTML =
-        '<p style="margin:0"><span class="org">' + esc(d.company || 'GRAFFEUILLE') + '</span>'
-      + (d.showBaseline !== false ? ' · Turgis Gaillard' : '')
-      + '<br>Carte de visite numérique'
-      + (site ? ' · <a href="' + esc(site) + '" target="_blank" rel="noopener">'
-              + esc(d.website) + '</a>' : '')
-      + '</p>';
-  }
-
   function render(d) {
     document.title = Contact.fullName(d) + ' — ' + (d.company || 'GRAFFEUILLE');
     var accent = d.accent || Contact.DEFAULTS.accent;
@@ -136,7 +124,6 @@
     renderCrest(d);
     renderIdentity(d);
     renderLinks(d);
-    renderFoot(d);
     $('#card').classList.toggle('with-portrait', !!d.photoUrl);
     $('#card').hidden = false;
     $('#missing').hidden = true;
