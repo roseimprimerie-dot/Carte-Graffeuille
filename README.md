@@ -11,6 +11,42 @@ Deux pages, un seul dépôt :
 Pourquoi ? : tout tourne dans le navigateur : pas de serveur, pas de compte, pas de
 dépendance externe.
 
+## Les adresses en ligne
+
+Le site est publié à la racine du dépôt, depuis la branche `main` :
+
+<https://roseimprimerie-dot.github.io/Carte-Graffeuille/>
+
+### Une adresse par employé
+
+C'est celle-ci que le QR code de sa carte imprimée fait ouvrir.
+
+| Personne | Adresse |
+| --- | --- |
+| Alain GRAFFEUILLE | <https://roseimprimerie-dot.github.io/Carte-Graffeuille/equipe/alain-graffeuille/> |
+| Jérôme GOUMARD | <https://roseimprimerie-dot.github.io/Carte-Graffeuille/equipe/jerome-goumard/> |
+| Marie-Noëlle GRAFFEUILLE | <https://roseimprimerie-dot.github.io/Carte-Graffeuille/equipe/marie-noelle-graffeuille/> |
+| Sarah FOSSARD | <https://roseimprimerie-dot.github.io/Carte-Graffeuille/equipe/sarah-fossard/> |
+| Michaël MANCIA | <https://roseimprimerie-dot.github.io/Carte-Graffeuille/equipe/michael-mancia/> |
+| Mickaël MOREL | <https://roseimprimerie-dot.github.io/Carte-Graffeuille/equipe/mickael-morel/> |
+| Fabrice PELLIZOTTI | <https://roseimprimerie-dot.github.io/Carte-Graffeuille/equipe/fabrice-pellizotti/> |
+| Jean-Michel GAISNON | <https://roseimprimerie-dot.github.io/Carte-Graffeuille/equipe/jean-michel-gaisnon/> |
+| Loïc BERNARD | <https://roseimprimerie-dot.github.io/Carte-Graffeuille/equipe/loic-bernard/> |
+
+### Les autres adresses
+
+| Adresse | Ce qu'elle ouvre |
+| --- | --- |
+| <https://roseimprimerie-dot.github.io/Carte-Graffeuille/editeur.html> | L'éditeur. Aucune page publique n'y renvoie : il n'est ni listé, ni protégé. |
+| <https://roseimprimerie-dot.github.io/Carte-Graffeuille/> | Entrée de secours. Sans fragment, elle affiche la carte de Jérôme Goumard. |
+| <https://roseimprimerie-dot.github.io/Carte-Graffeuille/#loic-bernard> | Ancienne forme par identifiant, toujours acceptée pour ne pas invalider un QR déjà imprimé. |
+| <https://roseimprimerie-dot.github.io/Carte-Graffeuille/equipe/sarah-fossard/carte.json> | La fiche brute d'une personne, telle que la page la lit. |
+
+Si vous branchez un jour un vrai domaine sur ce site, seule la racine change :
+les chemins restent identiques. Il faudra alors renseigner ce domaine dans le
+champ « Adresse du site publié » de l'éditeur **avant** de réimprimer, puisque
+c'est lui que le QR encode.
+
 ## Un dossier par personne
 
 Chaque employé a son propre dossier, sa propre adresse et ses propres fichiers :
@@ -26,7 +62,7 @@ equipe/
     carte.json
 ```
 
-`https://votre-site/equipe/jerome-goumard/` ouvre sa carte. Rien d'autre à
+L'adresse du dossier ouvre la carte de la personne. Rien d'autre à
 déclarer : il n'y a pas de liste centrale à tenir à jour, le dossier *est* la
 déclaration.
 
@@ -46,6 +82,20 @@ déclaration.
 
 Toutes les coordonnées sont reprises des fichiers d'impression fournis. Le
 site est `www.graffeuille.fr` pour l'ensemble de l'équipe.
+
+### Ajouter un employé
+
+1. Dupliquer `equipe/_modele/`, le renommer `prenom-nom`.
+2. Dans l'éditeur, remplir le formulaire, mettre `prenom-nom` dans
+   « Identifiant de la personne », puis **Fiche pour le site** : le fichier
+   `carte.json` téléchargé remplace celui du dossier.
+3. Déposer éventuellement une photo dans le dossier et écrire son nom de
+   fichier dans le champ « Photo du dossier ».
+4. Imprimer la carte : son QR pointe déjà vers la nouvelle adresse.
+
+`index.html` ne contient que trois lignes utiles — il désigne `carte.json` et
+charge le code commun. Il est donc identique dans tous les dossiers, et une
+refonte de la mise en page n'oblige jamais à repasser dessus.
 
 ## Le verso suit une grille
 
@@ -98,22 +148,6 @@ repli plus large ferait basculer un nom sur deux lignes.
 
 Pour un tirage, l'imprimeur peut évidemment substituer Author dans le SVG
 exporté et retrouver le fichier d'origine au trait près.
-
-### Ajouter un employé
-
-
-
-1. Dupliquer `equipe/_modele/`, le renommer `prenom-nom`.
-2. Dans l'éditeur, remplir le formulaire, mettre `prenom-nom` dans
-   « Identifiant de la personne », puis **Fiche pour le site** : le fichier
-   `carte.json` téléchargé remplace celui du dossier.
-3. Déposer éventuellement une photo dans le dossier et écrire son nom de
-   fichier dans le champ « Photo du dossier ».
-4. Imprimer la carte : son QR pointe déjà vers la nouvelle adresse.
-
-`index.html` ne contient que trois lignes utiles — il désigne `carte.json` et
-charge le code commun. Il est donc identique dans tous les dossiers, et une
-refonte de la mise en page n'oblige jamais à repasser dessus.
 
 ## Ce que voit la personne qui scanne
 
@@ -222,8 +256,12 @@ réel de la carte, avec identifiant court et avec coordonnées en URL.
 
 ## Mise en ligne
 
-Aucune compilation : `Settings → Pages → Deploy from a branch`, en pointant sur
-la racine du dépôt. En local :
+C'est fait : `Settings → Pages`, « Deploy from a branch », branche `main`,
+dossier racine. Il n'y a rien à compiler. Le fichier `.nojekyll` à la racine
+demande à GitHub de servir les fichiers tels quels — sans lui, tout dossier
+commençant par un tiret bas, dont `equipe/_modele`, serait écarté du site.
+
+En local :
 
 ```sh
 python3 -m http.server 8000
