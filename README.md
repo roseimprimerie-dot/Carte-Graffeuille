@@ -1,15 +1,15 @@
-# Cartes de visite GRAFFEUILLE
+# Cartes de visite dynamique - GRAFFEUILLE
 
 Deux pages, un seul dépôt :
 
 | Page | À qui elle s'adresse |
 | --- | --- |
 | `equipe/<personne>/` | **La carte en ligne**, une adresse par employé. C'est elle qui s'ouvre quand on scanne le QR code au dos de la carte imprimée. Elle ne montre que les coordonnées, sur une page pensée pour un téléphone. |
-| `index.html` | Point d'entrée de secours : affiche la personne désignée par le fragment d'URL. |
-| `editeur.html` | **L'atelier.** On y saisit les coordonnées, on voit la carte se composer, on exporte le fichier d'impression. Aucune page publique n'y renvoie. |
+| `index.html` | Entrée de secours : affiche la personne désignée par le fragment d'URL. |
+| `editeur.html` | **L'éditeur.** On y saisit les coordonnées, on voit la carte se composer, on exporte le fichier d'impression. Aucune page publique n'y renvoie. |
 
-Tout tourne dans le navigateur : pas de serveur, pas de compte, pas de
-dépendance externe. Le dossier se dépose tel quel sur GitHub Pages.
+Pourquoi ? : tout tourne dans le navigateur : pas de serveur, pas de compte, pas de
+dépendance externe.
 
 ## Un dossier par personne
 
@@ -51,11 +51,10 @@ différence compte : corriger un numéro sur le site met à jour toutes les cart
 déjà distribuées, alors qu'un QR contenant une vCard fige les coordonnées à
 l'encre.
 
-La page affiche le logo, le portrait s'il y en a un, le nom dans le bandeau
-rouge repris du verso imprimé, puis quatre lignes que l'on touche du pouce :
-appeler, écrire, ouvrir le site, ouvrir l'itinéraire. Le bouton « Ajouter à mes
-contacts » télécharge la fiche `.vcf`. Rien d'autre — aucun lien vers
-l'éditeur.
+La page affiche le logo, le portrait s'il y en a un, le nom, la fonction, puis
+quatre lignes que l'on touche du pouce : appeler, écrire, ouvrir le site,
+ouvrir l'itinéraire. Le bouton « Ajouter à mes contacts » télécharge la fiche
+`.vcf`.
 
 ### Trois formes d'adresse
 
@@ -71,42 +70,31 @@ sera confortable à scanner.
 
 ### Après une modification de `carte.json`
 
-La page relit le fichier à chaque ouverture (`cache: no-cache`), donc en local
-un simple rafraîchissement suffit. Sur GitHub Pages, le réseau de diffusion
-peut servir l'ancienne version quelques minutes après le `git push` — c'est le
-délai de publication, pas un cache du navigateur.
-
-## Fidélité au modèle d'origine
-
-La géométrie et les tracés proviennent du fichier d'impression fourni
-(`CDV-Graffeuille-JeromeGOUMARD.pdf`), décompilé puis converti en millimètres :
-
-| Élément | Origine |
-| --- | --- |
-| Format coupé | 54 × 85 mm (portrait) |
-| Fond perdu | 5 mm, traits de coupe aux quatre angles |
-| Symbole, logotype, signature « Turgis Gaillard » | tracés vectoriels extraits du PDF, non redessinés |
-| Filigrane du verso | le symbole agrandi et détouré, rogné au format |
-| Position du bandeau, du QR, des lignes de contact | relevée au millimètre sur le fichier source |
-| Rouge de marque | CMJN 0 / 95 / 95 / 0, soit `#E63329` à l'écran |
-
-Les deux fontes du fichier d'origine (Author et Roobert) sont sous licence
-commerciale et ne sont donc pas redistribuées ici : la mise en page utilise
-**Inter**, un grotesque libre de métriques voisines, et **Archivo** pour les
-titres de la page publique. Pour un tirage professionnel, l'imprimeur peut
-substituer la fonte de marque dans le SVG exporté.
+La page relit le fichier à chaque ouverture, donc en local un simple
+rafraîchissement suffit. Sur GitHub Pages, le réseau de diffusion peut servir
+l'ancienne version quelques minutes après le `git push` — c'est le délai de
+publication, pas un cache du navigateur.
 
 ## L'éditeur
 
-- **Édition en direct** — identité, fonction, coordonnées, établissement,
-  accroche du recto, couleur d'accent, filigrane.
-- **Annuaire local** — plusieurs cartes gardées dans le navigateur,
-  exportables et réimportables en JSON.
-- **Lien de partage** — l'état complet de l'éditeur tient dans le fragment
-  d'URL, pour reprendre une carte sur un autre poste.
-- **Exports** : impression PDF (deux pages vectorielles au format exact),
-  SVG recto et verso, PNG 600 dpi, fiche `.vcf`, et la fiche `.json` à déposer
-  dans `cartes/`.
+- **Édition en direct** - identité, fonction, coordonnées, établissement, accroche du recto, couleur d'accent, filigrane.
+- **Annuaire local** - Les cartes créées sont conservées dans le navigateur. Tu peux fermer l'onglet et revenir plus tard, elles sont toujours là.
+Attention : elles sont attachées à ce navigateur et à cet ordinateur.
+Vider l'historique, changer de machine ou naviguer en privé donne un
+annuaire vide.
+- **Exports** : Le bouton d'export télécharge un fichier `.json` contenant tout
+l'annuaire. Le bouton d'import le recharge. C'est la sauvegarde du
+projet : garde ce fichier quelque part de sûr, et sers-t'en pour
+transférer les cartes vers un autre poste ou vers un collègue.
+- **Lien de partage** : Ce bouton copie une adresse qui contient l'état complet de l'éditeur :
+coordonnées, thème, couleurs, mise en page. Ouvre ce lien sur
+n'importe quel autre ordinateur et l'éditeur se rouvre exactement
+comme tu l'avais laissé.
+
+ ## Où sont stockées les cartes
+ 
+ Le site n'a ni serveur, ni base de données, ni compte utilisateur.
+ Tout vit dans le navigateur de la personne qui utilise l'éditeur.
 
 ### Avant d'imprimer
 
@@ -135,7 +123,7 @@ hébergement qui sait demander un mot de passe.
 equipe/<personne>/      un dossier par employé : carte.json, photo, index.html
 equipe/_modele/         gabarit à dupliquer
 index.html              entrée de secours, pilotée par le fragment d'URL
-editeur.html            atelier de composition
+editeur.html            éditeur des cartes
 
 assets/js/contact.js    modèle partagé : valeurs, vCard, encodage de l'URL
 assets/js/icons.js      pictogrammes communs aux deux pages
@@ -169,4 +157,4 @@ python3 -m http.server 8000
 ```
 
 `http://localhost:8000/equipe/jerome-goumard/` ouvre sa carte,
-`http://localhost:8000/editeur.html` l'atelier.
+`http://localhost:8000/editeur.html` l’éditeur.
