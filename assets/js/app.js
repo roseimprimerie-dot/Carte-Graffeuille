@@ -226,34 +226,15 @@
   }
 
   /**
-   * Tente d'incorporer la fonte dans le SVG exporté. Sans elle, le
-   * rastérisateur retombe sur une fonte système : l'export reste lisible,
-   * seule la graisse change légèrement.
+   * Fontes incorporées au SVG exporté. Sans elles, un poste qui n'a ni Author
+   * ni Montserrat compose le fichier dans une fonte de substitution : les
+   * largeurs changent, et la mise en page relevée au millimètre ne tient plus.
+   *
+   * Elles viennent de fontes.js plutôt que du disque : le navigateur refuse
+   * fetch() sur file://, et l'éditeur doit marcher par simple double-clic.
    */
   function inlineFont() {
-    if (inlineFont.cache !== undefined) return Promise.resolve(inlineFont.cache);
-    var css = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
-    return fetch(css, { headers: { accept: 'text/css' } })
-      .then(function (r) { return r.text(); })
-      .then(function (sheet) {
-        var urls = (sheet.match(/url\((https:[^)]+\.woff2)\)/g) || [])
-          .map(function (m) { return m.slice(4, -1); }).slice(0, 4);
-        return Promise.all(urls.map(function (u) {
-          return fetch(u).then(function (r) { return r.arrayBuffer(); }).then(function (buf) {
-            var bin = '', view = new Uint8Array(buf);
-            for (var i = 0; i < view.length; i++) bin += String.fromCharCode(view[i]);
-            return { url: u, data: btoa(bin) };
-          });
-        })).then(function (fonts) {
-          var out = sheet;
-          fonts.forEach(function (f) {
-            out = out.split(f.url).join('data:font/woff2;base64,' + f.data);
-          });
-          inlineFont.cache = out;
-          return out;
-        });
-      })
-      .catch(function () { inlineFont.cache = null; return null; });
+    return Promise.resolve(window.CARD_FONTS_CSS || null);
   }
 
   function sideSvg(side, withFont) {

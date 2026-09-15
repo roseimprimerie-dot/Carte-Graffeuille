@@ -7,21 +7,16 @@ dépendance externe.
 
 ## Ouvrir l'éditeur
 
-Les fontes sont chargées par le CSS, donc le fichier doit être servi, pas
-ouvert depuis le disque :
-
-```sh
-python3 -m http.server 8099
-```
-
-puis <http://localhost:8099/editeur.html>.
+Double-cliquer sur `editeur.html`. Pas de serveur, pas de `localhost`, pas de
+connexion : tout se charge depuis le dossier, y compris les fontes, et rien ne
+sort du disque. Vérifié réseau coupé.
 
 ## Ce qu'il produit
 
 | Bouton | Fichier |
 | --- | --- |
 | Imprimer / PDF | La carte au format exact, fond perdu et traits de coupe en option. |
-| SVG | Vectoriel, fonte incorporée quand le navigateur l'autorise. |
+| SVG | Vectoriel, Author et Montserrat incorporées en base64 : le fichier se compose pareil sur un poste qui ne les a pas. |
 | PNG 600 dpi | Rastérisation pour une relecture rapide. |
 | Fiche contact `.vcf` | vCard 3.0, téléphone normalisé en E.164. |
 | Fiche de la personne `.json` | Les coordonnées, à déposer sur l'hébergement qui sert la page visée par le QR. |
@@ -54,6 +49,7 @@ porte les coordonnées dans l'URL elle-même, sans page à héberger.
 | `assets/js/card.js` | **Le seul fichier qui décrit la mise en page imprimée**, relevée au millimètre sur les fichiers fournis. |
 | `assets/js/contact.js` | Modèle de données, vCard, adresse visée par le QR. |
 | `assets/js/qrcode.js` | Encodeur QR (ISO/IEC 18004), sans bibliothèque tierce. |
+| `assets/js/fontes.js` | **Fichier généré** : les fontes de la carte en base64, incorporées au SVG exporté. Régénéré par `python3 outils/inclure-fontes.py`. |
 | `assets/js/icons.js` | Pictogrammes de la carte, tracés extraits de la fonte du fichier d'impression. |
 | `assets/js/logo.js` | Tracés du logotype, du symbole et de la signature. |
 | `assets/css/fonts.css` | Author (ITF Free Font License), Montserrat, Inter et Archivo (SIL OFL 1.1), servies par le site. |
@@ -66,6 +62,7 @@ fois l'éditeur au point, il se recopie là-bas.
 ```sh
 cp editeur.html   <depot-des-pages>/
 cp -r assets/     <depot-des-pages>/assets/
+cp -r outils/     <depot-des-pages>/outils/
 ```
 
 `cp -r` fusionne : les fichiers propres aux pages publiques — `carte.js`,
