@@ -56,7 +56,34 @@ porte les coordonnées dans l'URL elle-même, sans page à héberger.
 | `assets/js/qrcode.js` | Encodeur QR (ISO/IEC 18004), sans bibliothèque tierce. |
 | `assets/js/icons.js` | Pictogrammes de la carte, tracés extraits de la fonte du fichier d'impression. |
 | `assets/js/logo.js` | Tracés du logotype, du symbole et de la signature. |
-| `assets/css/fonts.css` | Author (ITF Free Font License), Montserrat et Inter (SIL OFL 1.1), servies par le site. |
+| `assets/css/fonts.css` | Author (ITF Free Font License), Montserrat, Inter et Archivo (SIL OFL 1.1), servies par le site. |
+
+## Reprise dans le dépôt qui sert les pages
+
+Les pages visées par le QR vivent ailleurs. Ce dépôt-ci est l'atelier : une
+fois l'éditeur au point, il se recopie là-bas.
+
+```sh
+cp editeur.html   <depot-des-pages>/
+cp -r assets/     <depot-des-pages>/assets/
+```
+
+`cp -r` fusionne : les fichiers propres aux pages publiques — `carte.js`,
+`carte.css`, les SVG de logo — restent en place, ils n'existent pas ici.
+`fonts.css` est volontairement un sur-ensemble : il déclare aussi Archivo,
+dont seules les pages publiques se servent, pour que l'écrasement ne leur
+retire rien.
+
+**Trois fichiers sont partagés avec la page publique** et l'écraser la touche :
+
+| Fichier | Ce que la page publique y prend |
+| --- | --- |
+| `contact.js` | `normalise`, `fullName`, `slugify`, `vcard`, `emails`, `e164`, `cityLine`, `addressQuery`, `websiteUrl`, `readFragment`, `DEFAULTS` |
+| `icons.js` | `Icons.inline` |
+| `logo.js` | `LOGO.mark`, `LOGO.wordmark`, `LOGO.tagline` |
+
+Tant qu'on n'enlève ni ne renomme rien de cette liste, la copie est sans
+risque. `app.js`, `card.js` et `qrcode.js` n'appartiennent qu'à l'éditeur.
 
 ## Licence des fontes
 
