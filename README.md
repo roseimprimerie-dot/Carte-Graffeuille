@@ -4,7 +4,7 @@ Toutes les cartes, un seul dépôt :
 
 | Page | À qui elle s'adresse |
 | --- | --- |
-| `<personne>/` | **La carte en ligne**, une adresse par employé. C'est elle qui s'ouvre quand on scanne le QR code au dos de la carte imprimée. Elle ne montre que les coordonnées, sur une page pensée pour un téléphone. |
+| `equipe/<personne>/` | **La carte en ligne**, une adresse par employé. C'est elle qui s'ouvre quand on scanne le QR code au dos de la carte imprimée. Elle ne montre que les coordonnées, sur une page pensée pour un téléphone. |
 | `index.html` | Entrée de secours : affiche la personne désignée par le fragment d'URL. |
 | `editeur.html` | **L'éditeur.** On y saisit les coordonnées, on voit la carte se composer, on exporte le fichier d'impression. Aucune page publique n'y renvoie. |
 
@@ -15,7 +15,7 @@ dépendance externe.
 
 Le site est publié à la racine du dépôt, depuis la branche `main` :
 
-<https://graffeuille.github.io/CDV/>
+<https://roseimprimerie-dot.github.io/Carte-Graffeuille/>
 
 ### Une adresse par employé
 
@@ -23,24 +23,24 @@ C'est celle-ci que le QR code de sa carte imprimée fait ouvrir.
 
 | Personne | Adresse |
 | --- | --- |
-| Alain GRAFFEUILLE | <https://graffeuille.github.io/CDV/alain-graffeuille> |
-| Jérôme GOUMARD | <https://graffeuille.github.io/CDV/jerome-goumard> |
-| Marie-Noëlle GRAFFEUILLE | <https://graffeuille.github.io/CDV/marie-noelle-graffeuille> |
-| Sarah FOSSARD | <https://graffeuille.github.io/CDV/sarah-fossard> |
-| Michaël MANCIA | <https://graffeuille.github.io/CDV/michael-mancia> |
-| Mickaël MOREL | <https://graffeuille.github.io/CDV/mickael-morel> |
-| Fabrice PELLIZOTTI | <https://graffeuille.github.io/CDV/fabrice-pellizotti> |
-| Jean-Michel GAISNON | <https://graffeuille.github.io/CDV/jean-michel-gaisnon> |
-| Loïc BERNARD | <https://graffeuille.github.io/CDV/loic-bernard> |
+| Alain GRAFFEUILLE | <https://roseimprimerie-dot.github.io/Carte-Graffeuille/equipe/alain-graffeuille/> |
+| Jérôme GOUMARD | <https://roseimprimerie-dot.github.io/Carte-Graffeuille/equipe/jerome-goumard/> |
+| Marie-Noëlle GRAFFEUILLE | <https://roseimprimerie-dot.github.io/Carte-Graffeuille/equipe/marie-noelle-graffeuille/> |
+| Sarah FOSSARD | <https://roseimprimerie-dot.github.io/Carte-Graffeuille/equipe/sarah-fossard/> |
+| Michaël MANCIA | <https://roseimprimerie-dot.github.io/Carte-Graffeuille/equipe/michael-mancia/> |
+| Mickaël MOREL | <https://roseimprimerie-dot.github.io/Carte-Graffeuille/equipe/mickael-morel/> |
+| Fabrice PELLIZOTTI | <https://roseimprimerie-dot.github.io/Carte-Graffeuille/equipe/fabrice-pellizotti/> |
+| Jean-Michel GAISNON | <https://roseimprimerie-dot.github.io/Carte-Graffeuille/equipe/jean-michel-gaisnon/> |
+| Loïc BERNARD | <https://roseimprimerie-dot.github.io/Carte-Graffeuille/equipe/loic-bernard/> |
 
 ### Les autres adresses
 
 | Adresse | Ce qu'elle ouvre |
 | --- | --- |
-| <https://graffeuille.github.io/CDV/editeur.html> | L'éditeur. Aucune page publique n'y renvoie : il n'est ni listé, ni protégé. |
-| <https://graffeuille.github.io/CDV/> | Entrée de secours. Sans fragment, elle affiche la carte de Jérôme Goumard. |
-| <https://graffeuille.github.io/CDV/#loic-bernard> | Ancienne forme par identifiant, toujours acceptée pour ne pas invalider un QR déjà imprimé. |
-| <https://graffeuille.github.io/CDV/sarah-fossard/carte.json> | La fiche brute d'une personne, telle que la page la lit. |
+| <https://roseimprimerie-dot.github.io/Carte-Graffeuille/editeur.html> | L'éditeur. Aucune page publique n'y renvoie : il n'est ni listé, ni protégé. |
+| <https://roseimprimerie-dot.github.io/Carte-Graffeuille/> | Entrée de secours. Sans fragment, elle affiche la carte de Jérôme Goumard. |
+| <https://roseimprimerie-dot.github.io/Carte-Graffeuille/#loic-bernard> | Ancienne forme par identifiant, toujours acceptée pour ne pas invalider un QR déjà imprimé. |
+| <https://roseimprimerie-dot.github.io/Carte-Graffeuille/equipe/sarah-fossard/carte.json> | La fiche brute d'une personne, telle que la page la lit. |
 
 Si vous branchez un jour un vrai domaine sur ce site, seule la racine change :
 les chemins restent identiques. Il faudra alors renseigner ce domaine dans le
@@ -52,13 +52,14 @@ c'est lui que le QR encode.
 Chaque employé a son propre dossier, sa propre adresse et ses propres fichiers :
 
 ```
-_modele/                   ← gabarit, dupliqué par l'éditeur
-  index.html               ← identique partout, jamais à modifier
-  carte.json               ← les coordonnées
-  portrait.svg             ← les fichiers propres à la personne
-jerome-goumard/
-  index.html
-  carte.json
+equipe/
+  _modele/                 ← à dupliquer pour ajouter quelqu'un
+    index.html             ← identique partout, jamais à modifier
+    carte.json             ← les coordonnées
+    portrait.svg           ← les fichiers propres à la personne
+  jerome-goumard/
+    index.html
+    carte.json
 ```
 
 L'adresse du dossier ouvre la carte de la personne. Rien d'autre à
@@ -84,16 +85,13 @@ site est `www.graffeuille.fr` pour l'ensemble de l'équipe.
 
 ### Ajouter un employé
 
-1. Dans l'éditeur, remplir le formulaire et donner un identifiant.
-2. **Créer la carte en ligne (.zip)** : l'archive contient déjà
-   `prenom-nom/index.html` et `prenom-nom/carte.json`. La décompresser à la
-   racine du site suffit.
+1. Dupliquer `equipe/_modele/`, le renommer `prenom-nom`.
+2. Dans l'éditeur, remplir le formulaire, mettre `prenom-nom` dans
+   « Identifiant de la personne », puis **Fiche pour le site** : le fichier
+   `carte.json` téléchargé remplace celui du dossier.
 3. Déposer éventuellement une photo dans le dossier et écrire son nom de
    fichier dans le champ « Photo du dossier ».
 4. Imprimer la carte : son QR pointe déjà vers la nouvelle adresse.
-
-Le bouton **Fiche seule (.json)** sert à mettre à jour un dossier existant
-sans toucher à son `index.html`.
 
 `index.html` ne contient que trois lignes utiles — il désigne `carte.json` et
 charge le code commun. Il est donc identique dans tous les dossiers, et une
@@ -126,22 +124,30 @@ dans les fichiers fournis — un téléphone mobile, un avion en papier, une
 la ligne de base comme le fait le PDF. Seul le globe, absent des cartes, est
 redessiné : il ne sert qu'à la ligne « site internet », facultative.
 
-**Les fontes sont celles de la maquette**, servies par le site :
-**Author** au verso, **Montserrat SemiBold** au recto. Author est sous ITF
-Free Font License, qui autorise explicitement l'auto-hébergement ; ses
-fichiers sont servis tels que livrés, sans sous-ensemble ni conversion, que
-la licence interdit.
+**La fonte du texte est Roboto Condensed**, servie par le site. La fonte
+d'origine, Author, est sous licence commerciale et ne peut pas être
+redistribuée ; il fallait donc une remplaçante libre dont les largeurs
+correspondent, parce que la mise en page en dépend : un nom trop large se
+coupe en deux lignes et décale tout le bloc.
 
-Avec les vraies Author, les largeurs du verso reproduisent celles du fichier
-d'impression à 0,1 % près.
+Les largeurs de référence ont été calculées à partir des métriques embarquées
+dans les PDF, puis comparées à dix fontes libres sur dix-sept chaînes des
+cartes réelles :
 
-### La licence Author mérite attention
+| Fonte | Écart médian aux largeurs d'Author |
+| --- | --- |
+| **Roboto Condensed** | **+0,4 %** |
+| Barlow Semi Condensed | −2,5 % |
+| Archivo Narrow | −3,4 % |
+| Inter | +21,8 % |
 
-Sa clause 02 interdit de mettre la fonte à disposition de tiers via un site
-ou un éditeur de gabarits, et de la distribuer via des serveurs publics. Un
-dépôt public où l'on peut télécharger les `.woff2`, et un éditeur ouvert à
-tous, s'en approchent. L'usage sur son propre site est en revanche
-explicitement permis.
+Inter, utilisée jusqu'ici, composait donc tout le verso 22 % trop large. Les
+fontes sont hébergées dans `assets/fonts/` plutôt que chargées depuis un
+tiers : la mise en page dépend de la mesure du texte rendu, et une fonte de
+repli plus large ferait basculer un nom sur deux lignes.
+
+Pour un tirage, l'imprimeur peut évidemment substituer Author dans le SVG
+exporté et retrouver le fichier d'origine au trait près.
 
 ## Ce que voit la personne qui scanne
 
@@ -159,7 +165,7 @@ ouvrir l'itinéraire. Le bouton « Ajouter à mes contacts » télécharge la fi
 
 | Adresse | Usage |
 | --- | --- |
-| `…/CDV/prenom-nom` | **La bonne.** 77 caractères : le QR tombe en version 5, ses modules mesurent **0,54 mm** imprimés, il se scanne sans effort. |
+| `…/equipe/prenom-nom/` | **La bonne.** 77 caractères : le QR tombe en version 5, ses modules mesurent **0,54 mm** imprimés, il se scanne sans effort. |
 | `…/#prenom-nom` | Ancienne forme, toujours acceptée pour ne pas invalider un QR déjà imprimé. |
 | `…/#c=<données>` | Les coordonnées voyagent dans l'URL : rien à déposer sur le site, mais l'adresse atteint ~380 caractères et le QR descend à ~0,26 mm par module, ce qui devient juste pour un tirage à 24 mm. |
 
@@ -200,7 +206,7 @@ comme tu l'avais laissé.
 1. Renseigner **« Adresse du site publié »** avec le domaine réel. Sur GitHub
    Pages ce champ peut rester vide : l'éditeur déduit l'adresse de l'endroit
    d'où il est servi.
-2. Donner un **identifiant**, dupliquer `_modele/` sous ce nom, et y
+2. Donner un **identifiant**, dupliquer `equipe/_modele/` sous ce nom, et y
    déposer la fiche `carte.json` produite.
 3. Vérifier le verdict affiché sous l'URL (taille de module).
 4. Cocher **« Fond perdu de 5 mm et traits de coupe »**, puis imprimer avec des
@@ -219,8 +225,8 @@ hébergement qui sait demander un mot de passe.
 ## Organisation du code
 
 ```
-<personne>/             un dossier par employé : carte.json, photo, index.html
-_modele/                gabarit à dupliquer
+equipe/<personne>/      un dossier par employé : carte.json, photo, index.html
+equipe/_modele/         gabarit à dupliquer
 index.html              entrée de secours, pilotée par le fragment d'URL
 editeur.html            éditeur des cartes
 
@@ -253,7 +259,7 @@ réel de la carte, avec identifiant court et avec coordonnées en URL.
 C'est fait : `Settings → Pages`, « Deploy from a branch », branche `main`,
 dossier racine. Il n'y a rien à compiler. Le fichier `.nojekyll` à la racine
 demande à GitHub de servir les fichiers tels quels — sans lui, tout dossier
-commençant par un tiret bas, dont `_modele`, serait écarté du site.
+commençant par un tiret bas, dont `equipe/_modele`, serait écarté du site.
 
 En local :
 
@@ -261,5 +267,5 @@ En local :
 python3 -m http.server 8000
 ```
 
-`http://localhost:8000/jerome-goumard/` ouvre sa carte,
+`http://localhost:8000/equipe/jerome-goumard/` ouvre sa carte,
 `http://localhost:8000/editeur.html` l’éditeur.

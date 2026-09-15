@@ -6,7 +6,8 @@ window.Contact = (function () {
   'use strict';
 
   // Coordonnées de la carte d'origine, servant aussi de modèle de départ.
-  // Adresse du site publié : c'est elle que porte le QR des cartes imprimées.
+  // Racine du site publié. Le QR des cartes imprimées porte une adresse absolue
+  // bâtie sur elle, jamais sur la page d'où l'éditeur a été ouvert.
   var SITE = 'https://graffeuille.github.io/CDV/';
 
   var DEFAULTS = {
@@ -186,7 +187,7 @@ window.Contact = (function () {
   function cardUrl(base, d) {
     var root = String(base || SITE).replace(/(editeur\.html)?(#.*)?$/, '');
     if (!/\/$/.test(root)) root += '/';
-    return d.slug ? root + d.slug : root + '#c=' + pack(d);
+    return d.slug ? root + 'equipe/' + d.slug + '/' : root + '#c=' + pack(d);
   }
 
   /** Lit le fragment d'URL d'une page publique : identifiant ou coordonnées. */

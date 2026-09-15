@@ -18,7 +18,7 @@
 
   // Emplacements où chercher la fiche d'un identifiant court. Le premier est
   // l'organisation actuelle ; le second garde valides les QR déjà imprimés.
-  var LOOKUP = ['{slug}/carte.json', 'equipe/{slug}/carte.json', 'cartes/{slug}.json'];
+  var LOOKUP = ['equipe/{slug}/carte.json', 'cartes/{slug}.json'];
 
   var CHEVRON = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" '
               + 'focusable="false"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" '
