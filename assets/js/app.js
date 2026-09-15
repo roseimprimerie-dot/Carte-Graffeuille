@@ -82,9 +82,7 @@
   /** Racine du site publié : celle qu'a saisie l'utilisateur, sinon celle d'où
    *  l'éditeur est servi — ce qui suffit dès que le site est en ligne. */
   function siteRoot(d) {
-    var typed = String(d.siteBase || '').trim();
-    if (typed) return typed;
-    return location.origin + location.pathname.replace(/editeur\.html$/, '');
+    return String(d.siteBase || '').trim() || Contact.SITE;
   }
 
   function normalise(d) {
@@ -101,7 +99,7 @@
     var view = Object.assign({}, state, { qrPayload: url });
 
     var front = $('#preview-front'), back = $('#preview-back');
-    front.innerHTML = Card.front(view, { bleed: state.bleed, marks: state.bleed });
+    Card.frontInto(front, view, { bleed: state.bleed, marks: state.bleed });
     Card.backInto(back, view, { bleed: state.bleed, marks: state.bleed });
 
     // Le format de page suit l'option de fond perdu.
@@ -219,6 +217,14 @@
       .replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'carte';
   }
 
+  /** Fiche d'une personne, débarrassée de ce qui appartient à ce poste. */
+  function cardRecord(folder) {
+    var record = Object.assign({}, state, { slug: folder });
+    delete record.siteBase;   // propre à ce poste, pas à la fiche
+    delete record.bleed;      // réglage d'impression, pas une coordonnée
+    return record;
+  }
+
   /**
    * Tente d'incorporer la fonte dans le SVG exporté. Sans elle, le
    * rastérisateur retombe sur une fonte système : l'export reste lisible,
@@ -254,14 +260,16 @@
     var opts = { bleed: state.bleed, marks: state.bleed };
     var view = Object.assign({}, state, { qrPayload: Contact.cardUrl(siteRoot(state), state) });
     var markup;
+    var host = document.createElement('div');
+    host.style.cssText = 'position:fixed;left:-9999px;top:0;width:200mm';
+    document.body.appendChild(host);
     if (side === 'front') {
-      markup = Card.front(view, opts);
+      Card.frontInto(host, view, opts);
+      markup = host.innerHTML;
+      host.remove();
     } else {
-      // Le verso se compose à partir du texte mesuré : on le pose hors écran,
-      // puis on resérialise le résultat.
-      var host = document.createElement('div');
-      host.style.cssText = 'position:fixed;left:-9999px;top:0;width:200mm';
-      document.body.appendChild(host);
+      // Les deux faces se composent à partir du texte mesuré : on les pose
+      // hors écran, puis on resérialise le résultat.
       Card.backInto(host, view, opts);
       markup = host.innerHTML;
       host.remove();
@@ -433,13 +441,33 @@
         form.elements.slug.value = folder;
         update();
       }
-      var record = Object.assign({}, state, { slug: folder });
-      delete record.siteBase;   // propre à ce poste, pas à la fiche
-      delete record.bleed;      // réglage d'impression, pas une coordonnée
       download('carte.json',
-        new Blob([JSON.stringify(record, null, 2) + '\n'], { type: 'application/json' }));
-      toast('À déposer dans equipe/' + folder + '/carte.json, '
-        + 'à côté d’un index.html copié depuis equipe/_modele.');
+        new Blob([JSON.stringify(cardRecord(folder), null, 2) + '\n'],
+                 { type: 'application/json' }));
+      toast('À déposer dans ' + folder + '/carte.json, '
+        + 'à côté d’un index.html copié depuis _modele.');
+    });
+
+    // Dossier complet de la personne, prêt à déposer à la racine du dépôt :
+    // c'est tout ce qu'il faut pour que sa carte existe en ligne.
+    $('#btn-export-folder').addEventListener('click', function () {
+      var folder = state.slug || slug(state);
+      if (!state.slug) { form.elements.slug.value = folder; update(); }
+      fetch('_modele/index.html', { cache: 'no-cache' })
+        .then(function (r) {
+          if (!r.ok) throw new Error('gabarit introuvable');
+          return r.text();
+        })
+        .then(function (stub) {
+          var files = {};
+          files[folder + '/index.html'] = stub;
+          files[folder + '/carte.json'] = JSON.stringify(cardRecord(folder), null, 2) + '\n';
+          download(folder + '.zip', Zip.create(files));
+          toast('Dossier « ' + folder + ' » prêt : à décompresser à la racine du site.');
+        })
+        .catch(function () {
+          toast('Gabarit _modele/index.html introuvable — servez l’éditeur depuis le site.');
+        });
     });
 
     $('#btn-export-json').addEventListener('click', function () {

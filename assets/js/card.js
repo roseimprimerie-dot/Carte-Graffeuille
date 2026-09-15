@@ -6,12 +6,19 @@
   // Repères verticaux repris des anciennes cartes
   
   var GEO = {
+    // Recto, relevé sur CDV-Graffeuille-Recto.ai. Sa composition ne varie pas
+    // d'une personne à l'autre : seules l'accroche et l'adresse en sortent.
     recto: {
-      arrow:      { x: 5.62, y: 56.83, size: 5.22 },
-      taglineX:   6.375,
-      taglineY:   62.13,
-      taglineLead: 3.53,
-      taglineSize: 3.175
+      font:       "'Montserrat','Helvetica Neue',Helvetica,Arial,sans-serif",
+      // Le logo vectoriel est remis à l'échelle du bloc de la maquette.
+      logo:       { x: 3.10, y: 17.83, width: 47.49 },
+      // Diagonale blanche, d'un bord à l'autre du fond perdu.
+      diagonal:   { x1: -15.06, y1: 61.62, x2: 36.90, y2: -3.22, width: 0.227 },
+      arrow:      { x: 4.76, y: 51.04, size: 1.82 },
+      tagline:    { x: 6.97, baseline: 50.99, lead: 2.88, size: 2.402 },
+      address:    { right: 48.15, baseline: 72.70, lead: 3.17, size: 2.398,
+                    companySize: 3.034, iconGap: 1.18, pinSize: 3.45, pinDrop: 0.63,
+                    rule: { x: 50.68, top: 68.36, bottom: 80.61, width: 0.245 } }
     },
     verso: {
       qr:         { x: 6.11, y: 5.83, size: 24.19 },
@@ -58,7 +65,7 @@
     if (!str) return '';
     var a = [];
     a.push('x="' + f(opts.x) + '"', 'y="' + f(opts.y) + '"');
-    a.push('font-family="' + FONT + '"');
+    a.push('font-family="' + (opts.font || FONT) + '"');
     a.push('font-size="' + f(opts.size) + '"');
     a.push('fill="' + (opts.fill || '#111') + '"');
     if (opts.weight) a.push('font-weight="' + opts.weight + '"');
@@ -73,12 +80,13 @@
 
   // Flèche diagonale du recto, redessinée en vectoriel (elle est un glyphe
   // dans le fichier d'origine, donc non reproductible sans la fonte).
-  function arrow(g, color) {
-    var s = g.size, th = s * 0.10, head = s * 0.30, half = s * 0.19;
+  function arrow(g, color, angle) {
+    var s = g.size, th = s * 0.14, head = s * 0.38, half = s * 0.26;
     var d = 'M0 ' + f(-th / 2) + 'H' + f(s - head) + 'V' + f(-half)
           + 'L' + f(s) + ' 0L' + f(s - head) + ' ' + f(half)
           + 'V' + f(th / 2) + 'H0Z';
-    return '<g transform="translate(' + f(g.x) + ' ' + f(g.y) + ') rotate(45)">'
+    return '<g transform="translate(' + f(g.x) + ' ' + f(g.y) + ') rotate('
+         + (angle == null ? 45 : angle) + ')">'
          + '<path d="' + d + '" fill="' + color + '"/></g>';
   }
 
@@ -118,21 +126,67 @@
   function renderFront(d, opts) {
     opts = opts || {};
     var g = GEO.recto, accent = d.accent || '#FF1900', ink = d.frontInk || '#FFFFFF';
+    var bleed = opts.bleed ? BLEED : 0;
+    var uid = 'r' + Math.random().toString(36).slice(2, 8);
     var out = [open({ bleed: opts.bleed, className: 'card-svg card-front',
                       label: 'Recto : ' + (d.company || 'GRAFFEUILLE') })];
 
     out.push(background(opts, accent));
-    out.push('<path d="' + LOGO.mark + '" fill="' + ink + '"/>');
-    out.push('<path d="' + LOGO.wordmark + '" fill="' + ink + '"/>');
-    if (d.showBaseline !== false) out.push('<path d="' + LOGO.tagline + '" fill="' + ink + '"/>');
 
-    var lines = String(d.tagline || '').split('\n').filter(function (l) { return l.trim(); });
+    // Diagonale, rognée au format pour qu'elle ne déborde pas du fond perdu.
+    var dg = g.diagonal;
+    out.push('<defs><clipPath id="clipr-' + uid + '"><rect x="' + f(-bleed) + '" y="' + f(-bleed)
+           + '" width="' + f(TRIM_W + bleed * 2) + '" height="' + f(TRIM_H + bleed * 2) + '"/></clipPath></defs>');
+    out.push('<g clip-path="url(#clipr-' + uid + ')"><path d="M' + f(dg.x1) + ' ' + f(dg.y1)
+           + 'L' + f(dg.x2) + ' ' + f(dg.y2) + '" fill="none" stroke="' + ink
+           + '" stroke-width="' + f(dg.width) + '"/></g>');
+
+    // Logo : les tracés sont dans le repère de la carte d'origine, on les
+    // replace et les met à l'échelle du bloc de cette maquette.
+    var src = { x: 3.75, y: 22.76, w: 46.50 };
+    var k = g.logo.width / src.w;
+    out.push('<g transform="translate(' + f(g.logo.x) + ' ' + f(g.logo.y) + ') scale('
+           + k.toFixed(6) + ') translate(' + f(-src.x) + ' ' + f(-src.y) + ')">'
+           + '<path d="' + LOGO.mark + '" fill="' + ink + '"/>'
+           + '<path d="' + LOGO.wordmark + '" fill="' + ink + '"/>'
+           + (d.showBaseline !== false ? '<path d="' + LOGO.tagline + '" fill="' + ink + '"/>' : '')
+           + '</g>');
+
+    // Accroche, précédée de sa flèche montante.
+    var lines = String(d.tagline || '').split('\n')
+                  .map(function (l) { return l.trim(); })
+                  .filter(Boolean);
     if (lines.length) {
-      out.push(arrow(g.arrow, ink));
+      out.push(arrow(g.arrow, ink, -45));
       lines.forEach(function (line, i) {
-        out.push(text(line, { x: g.taglineX, y: g.taglineY + i * g.taglineLead,
-                              size: g.taglineSize, fill: ink, weight: 500, spacing: -0.01 }));
+        out.push(text(line, { x: g.tagline.x, y: g.tagline.baseline + i * g.tagline.lead,
+                              size: g.tagline.size, fill: ink, weight: 600,
+                              font: g.font }));
       });
+    }
+
+    // Bloc adresse, aligné à droite et bordé d'un filet blanc.
+    var a = g.address;
+    var addr = [];
+    if (d.company) addr.push({ str: d.company, size: a.companySize, pin: true });
+    if (d.street) addr.push({ str: d.street, size: a.size });
+    var cityLine = [d.postalCode, d.city].filter(Boolean).join(' ')
+                 + (d.country ? ' - ' + d.country : '');
+    if (cityLine.trim()) addr.push({ str: cityLine.trim(), size: a.size });
+
+    if (addr.length) {
+      addr.forEach(function (line, i) {
+        var y = a.baseline + i * a.lead;
+        out.push(text(line.str, { x: a.right, y: y, size: line.size, fill: ink,
+                                  weight: 600, anchor: 'end', font: g.font,
+                                  id: line.pin ? 'forg-' + uid : null }));
+        if (line.pin) {
+          out.push('<g id="fpin-' + uid + '">'
+                 + icon('pin', 0, y + a.pinDrop, a.pinSize, ink) + '</g>');
+        }
+      });
+      out.push('<path d="M' + f(a.rule.x) + ' ' + f(a.rule.top) + 'V' + f(a.rule.bottom)
+             + '" fill="none" stroke="' + ink + '" stroke-width="' + f(a.rule.width) + '"/>');
     }
 
     if (opts.marks) out.push(cropMarks(ink));
@@ -368,10 +422,8 @@
     if (org && pin) {
       var ow = 0;
       try { ow = org.getComputedTextLength(); } catch (e) { return; }
-      var glyph = Icons.glyphs.pin.box;
-      var drawn = (glyph[2] - glyph[0]) / Icons.UPEM * g2.pinSize;
-      var left = g2.right - ow - g2.iconGap - drawn;
       var k = g2.pinSize / Icons.UPEM;
+      var left = g2.right - ow - g2.iconGap - Icons.glyphs.pin.box[2] * k;
       pin.parentNode.setAttribute('transform', 'translate(' + f(left) + ' '
         + f(g2.baseline + g2.pinDrop) + ') scale(' + k.toFixed(6) + ' ' + (-k).toFixed(6) + ')');
     }
@@ -410,6 +462,28 @@
     mask.setAttribute('height', f(y1 - y0));
   }
 
+  /** Place l'épingle du recto à gauche de la raison sociale, une fois mesurée. */
+  function fitFront(svgEl) {
+    if (!svgEl) return;
+    var a = GEO.recto.address;
+    var org = svgEl.querySelector('[id^="forg-"]');
+    var pin = svgEl.querySelector('[id^="fpin-"] path');
+    if (!org || !pin) return;
+    var ow = 0;
+    try { ow = org.getComputedTextLength(); } catch (e) { return; }
+    var k = a.pinSize / Icons.UPEM;
+    pin.parentNode.setAttribute('transform',
+      'translate(' + f(a.right - ow - a.iconGap - Icons.glyphs.pin.box[2] * k) + ' '
+      + f(a.baseline + a.pinDrop) + ') scale(' + k.toFixed(6) + ' ' + (-k).toFixed(6) + ')');
+  }
+
+  /** Pose le recto dans un élément du document, puis ajuste ce qui se mesure. */
+  function frontInto(host, d, opts) {
+    host.innerHTML = renderFront(d, opts || {});
+    fitFront(host.firstElementChild);
+    return host.firstElementChild;
+  }
+
   /**
    * Pose le verso dans un élément du document : un premier rendu sert à
    * mesurer le texte, un second applique les coupures qui en découlent, puis
@@ -429,6 +503,7 @@
 
   global.Card = {
     TRIM_W: TRIM_W, TRIM_H: TRIM_H, BLEED: BLEED,
-    front: renderFront, back: renderBack, backInto: backInto, fitBand: fitBand
+    front: renderFront, back: renderBack,
+    frontInto: frontInto, backInto: backInto, fitBand: fitBand, fitFront: fitFront
   };
 }(window));
