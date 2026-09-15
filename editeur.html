@@ -206,8 +206,7 @@
       <div class="panel-body">
         <div class="roster" id="roster"></div>
         <div class="exports">
-          <button type="button" id="btn-export-folder" class="primary">Créer la carte en ligne (.zip)</button>
-          <button type="button" id="btn-export-card" class="ghost">Fiche seule (.json)</button>
+          <button type="button" id="btn-export-card" class="primary">Fiche de la personne (.json)</button>
           <button type="button" id="btn-export-json" class="ghost">Exporter l’annuaire (.json)</button>
           <button type="button" id="btn-import-json" class="ghost">Importer un annuaire</button>
           <input type="file" id="file-json" accept="application/json,.json" hidden>
@@ -237,7 +236,7 @@
         <button type="button" id="btn-vcf">Fiche contact .vcf</button>
         <button type="button" id="btn-svg">SVG</button>
         <button type="button" id="btn-png">PNG 600 dpi</button>
-        <a class="btn" id="btn-open-public" href="index.html" target="_blank" rel="noopener">Ouvrir la page publique</a>
+        <button type="button" id="btn-open-public">Ouvrir la cible du QR</button>
       </div>
       <p class="notice" id="embedded-notice" hidden></p>
       <p class="meta" id="meta"></p>
@@ -249,7 +248,6 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="assets/js/qrcode.js"></script>
-<script src="assets/js/zip.js"></script>
 <script src="assets/js/icons.js"></script>
 <script src="assets/js/logo.js"></script>
 <script src="assets/js/contact.js"></script>

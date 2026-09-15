@@ -433,8 +433,9 @@
     $('#btn-svg').addEventListener('click', exportSvg);
     $('#btn-png').addEventListener('click', exportPng);
 
-    // Fiche d'une personne : elle se dépose dans son dossier, sous le nom
-    // carte.json, à côté de l'index.html copié depuis equipe/_modele.
+    // Fiche d'une personne, telle que la page en ligne la lira. Le dépôt ne
+    // porte plus que l'éditeur : ce fichier part vers l'hébergement qui sert
+    // l'adresse visée par le QR.
     $('#btn-export-card').addEventListener('click', function () {
       var folder = state.slug || slug(state);
       if (!state.slug) {
@@ -444,31 +445,8 @@
       download('carte.json',
         new Blob([JSON.stringify(cardRecord(folder), null, 2) + '\n'],
                  { type: 'application/json' }));
-      toast('À déposer dans ' + folder + '/carte.json, '
-        + 'à côté d’un index.html copié depuis _modele.');
-    });
-
-    // Dossier complet de la personne, prêt à déposer à la racine du dépôt :
-    // c'est tout ce qu'il faut pour que sa carte existe en ligne.
-    $('#btn-export-folder').addEventListener('click', function () {
-      var folder = state.slug || slug(state);
-      if (!state.slug) { form.elements.slug.value = folder; update(); }
-      fetch('equipe/_modele/index.html', { cache: 'no-cache' })
-        .then(function (r) {
-          if (!r.ok) throw new Error('gabarit introuvable');
-          return r.text();
-        })
-        .then(function (stub) {
-          var files = {};
-          files['equipe/' + folder + '/index.html'] = stub;
-          files['equipe/' + folder + '/carte.json'] =
-            JSON.stringify(cardRecord(folder), null, 2) + '\n';
-          download(folder + '.zip', Zip.create(files));
-          toast('Dossier « ' + folder + ' » prêt : à décompresser à la racine du site.');
-        })
-        .catch(function () {
-          toast('Gabarit equipe/_modele/index.html introuvable — servez l’éditeur depuis le site.');
-        });
+      toast('À déposer dans equipe/' + folder + '/carte.json sur le site '
+        + 'qui sert l’adresse visée par le QR.');
     });
 
     $('#btn-export-json').addEventListener('click', function () {
