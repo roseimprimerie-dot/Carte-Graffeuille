@@ -453,20 +453,21 @@
     $('#btn-export-folder').addEventListener('click', function () {
       var folder = state.slug || slug(state);
       if (!state.slug) { form.elements.slug.value = folder; update(); }
-      fetch('_modele/index.html', { cache: 'no-cache' })
+      fetch('equipe/_modele/index.html', { cache: 'no-cache' })
         .then(function (r) {
           if (!r.ok) throw new Error('gabarit introuvable');
           return r.text();
         })
         .then(function (stub) {
           var files = {};
-          files[folder + '/index.html'] = stub;
-          files[folder + '/carte.json'] = JSON.stringify(cardRecord(folder), null, 2) + '\n';
+          files['equipe/' + folder + '/index.html'] = stub;
+          files['equipe/' + folder + '/carte.json'] =
+            JSON.stringify(cardRecord(folder), null, 2) + '\n';
           download(folder + '.zip', Zip.create(files));
           toast('Dossier « ' + folder + ' » prêt : à décompresser à la racine du site.');
         })
         .catch(function () {
-          toast('Gabarit _modele/index.html introuvable — servez l’éditeur depuis le site.');
+          toast('Gabarit equipe/_modele/index.html introuvable — servez l’éditeur depuis le site.');
         });
     });
 
