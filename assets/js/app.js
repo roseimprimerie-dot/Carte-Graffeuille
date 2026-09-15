@@ -9,7 +9,7 @@
 
   var DEFAULTS = Contact.DEFAULTS;
 
-  var SWATCHES = ['#e63329', '#b01d16', '#1f2937', '#0f4c81', '#0b7a5a', '#c2410c'];
+  var SWATCHES = ['#ff1900', '#b01d16', '#1f2937', '#0f4c81', '#0b7a5a', '#c2410c'];
 
   var FIELDS = Contact.FIELDS.concat(['siteBase']);
 

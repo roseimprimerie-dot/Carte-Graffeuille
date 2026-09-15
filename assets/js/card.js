@@ -24,17 +24,19 @@
                     band: { x: 7.40, height: 4.233, padding: 1.0, rise: 1.12 } },
       rows:       { iconX: 7.28, textX: 11.40, size: 3.175, lead: 4.24,
                     baseline: 53.66, clearance: 7.13, max: 3 },
-      address:    { baseline: 70.00, lead: 2.822, size: 2.822, iconGap: 1.0,
-                    pinSize: 3.175, pinDrop: 0.19 }
+      // Le bloc adresse est aligné à droite sur 46,11 mm, avec un filet
+      // vertical rouge à 47,41 mm — relevés sur le fichier d'impression.
+      address:    { right: 46.11, baseline: 70.00, lead: 2.822, size: 2.822,
+                    iconGap: 1.69, pinSize: 3.175, pinDrop: 0.19,
+                    ruleGap: 1.30, ruleRise: 2.34, ruleWidth: 0.176 },
+      // Caches blancs : le filigrane ne doit pas passer sous le texte.
+      mask:       { pad: 0.8, rise: 0.85, drop: 0.30 }
     }
   };
 
-  // Roboto Condensed tient lieu d'Author, la fonte du fichier d'origine, qui
-  // est sous licence commerciale. Ses largeurs la reproduisent à 0,4 % près sur
-  // les chaînes des cartes fournies, alors qu'un grotesque de largeur normale
-  // déborde de plus de 20 % — de quoi faire passer un nom sur deux lignes.
-  var FONT = "'Roboto Condensed','Roboto Condensed Fallback',"
-           + "'Helvetica Neue Condensed','Arial Narrow',Helvetica,Arial,sans-serif";
+  // Author, la fonte du fichier d'impression, désormais servie par le site :
+  // les largeurs du verso sont donc exactes, et non plus approchées.
+  var FONT = "'Author','Helvetica Neue',Helvetica,Arial,sans-serif";
 
   // Les pictogrammes se posent sur la ligne de base comme un caractère : c'est
   // ainsi que le fichier d'origine les place, et leur repère le permet.
@@ -115,7 +117,7 @@
   /** Recto : aplat de couleur, logo, accroche. */
   function renderFront(d, opts) {
     opts = opts || {};
-    var g = GEO.recto, accent = d.accent || '#E63329', ink = d.frontInk || '#FFFFFF';
+    var g = GEO.recto, accent = d.accent || '#FF1900', ink = d.frontInk || '#FFFFFF';
     var out = [open({ bleed: opts.bleed, className: 'card-svg card-front',
                       label: 'Recto : ' + (d.company || 'GRAFFEUILLE') })];
 
@@ -170,7 +172,7 @@
   /** Verso : filigrane, QR vCard, coordonnées. */
   function renderBack(d, opts) {
     opts = opts || {};
-    var g = GEO.verso, accent = d.accent || '#E63329';
+    var g = GEO.verso, accent = d.accent || '#FF1900';
     var uid = 'c' + Math.random().toString(36).slice(2, 8);
     var bleed = opts.bleed ? BLEED : 0;
     var out = [open({ bleed: opts.bleed, className: 'card-svg card-back',
@@ -225,6 +227,9 @@
     if (d.phone) rows.push(['phone', d.phone]);
     Contact.emails(d).forEach(function (address) { rows.push(['mail', address]); });
     if (d.website && d.websiteInContacts) rows.push(['globe', d.website]);
+    if (rows.length) {
+      out.push('<rect class="mask-rows-' + uid + '" x="0" y="0" width="0" height="0" fill="#FFFFFF"/>');
+    }
     rows.slice(0, g.rows.max).forEach(function (row, i) {
       var base = firstRow + i * g.rows.lead;
       out.push(icon(row[0], g.rows.iconX, base, g.rows.size, accent));
@@ -232,8 +237,9 @@
                               fill: '#111111', weight: 500, cls: 'row-' + uid }));
     });
 
-    // Bloc adresse centré, pictogramme inclus dans le centrage de la 1re ligne.
-    var a = g.address, cx = TRIM_W / 2;
+    // Bloc adresse, aligné à droite. Son cache blanc et la place du
+    // pictogramme dépendent de la largeur du texte : ajustés après rendu.
+    var a = g.address;
     var addr = [];
     if (d.company) addr.push({ str: d.company, weight: 700, pin: true });
     if (d.street) addr.push({ str: d.street, weight: 400 });
@@ -242,20 +248,24 @@
     if (cityLine.trim()) addr.push({ str: cityLine.trim(), weight: 400 });
     if (d.website) addr.push({ str: d.website, weight: 500 });
 
-    addr.forEach(function (line, i) {
-      var y = a.baseline + i * a.lead;
-      if (line.pin) {
-        // La ligne est décalée pour laisser place au pictogramme à sa gauche.
-        out.push(text(line.str, { x: cx + a.size * 0.45, y: y, size: a.size,
-                                  fill: '#111111', weight: line.weight, anchor: 'middle',
-                                  id: 'org-' + uid }));
-        out.push('<g id="pin-' + uid + '">'
-               + icon('pin', cx - a.size * 0.45, y + a.pinDrop, a.pinSize, accent) + '</g>');
-      } else {
-        out.push(text(line.str, { x: cx, y: y, size: a.size, fill: '#111111',
-                                  weight: line.weight, anchor: 'middle' }));
-      }
-    });
+    if (addr.length) {
+      out.push('<rect class="mask-addr-' + uid + '" x="0" y="0" width="0" height="0" fill="#FFFFFF"/>');
+      addr.forEach(function (line, i) {
+        var y = a.baseline + i * a.lead;
+        out.push(text(line.str, { x: a.right, y: y, size: a.size, fill: '#111111',
+                                  weight: line.weight, anchor: 'end',
+                                  cls: 'addr-' + uid,
+                                  id: line.pin ? 'org-' + uid : null }));
+        if (line.pin) {
+          out.push('<g id="pin-' + uid + '">'
+                 + icon('pin', 0, y + a.pinDrop, a.pinSize, accent) + '</g>');
+        }
+      });
+      var lastY = a.baseline + (addr.length - 1) * a.lead;
+      out.push('<path d="M' + f(a.right + a.ruleGap) + ' ' + f(a.baseline - a.ruleRise)
+             + 'V' + f(lastY) + '" fill="none" stroke="' + accent
+             + '" stroke-width="' + f(a.ruleWidth) + '"/>');
+    }
 
     if (opts.marks) out.push(cropMarks(accent));
     out.push('</svg>');
@@ -350,19 +360,54 @@
       }
     }
 
+    // L'épingle se pose à gauche de la raison sociale, dont la largeur n'est
+    // connue qu'une fois le texte rendu.
+    var g2 = GEO.verso.address;
     var org = svgEl.querySelector('[id^="org-"]');
     var pin = svgEl.querySelector('[id^="pin-"] path');
     if (org && pin) {
       var ow = 0;
       try { ow = org.getComputedTextLength(); } catch (e) { return; }
-      var a = g.address, cx = TRIM_W / 2;
       var glyph = Icons.glyphs.pin.box;
-      var drawn = (glyph[2] - glyph[0]) / Icons.UPEM * a.pinSize;
-      var left = cx + a.size * 0.45 - ow / 2 - a.iconGap - drawn;
-      var k = a.pinSize / Icons.UPEM;
+      var drawn = (glyph[2] - glyph[0]) / Icons.UPEM * g2.pinSize;
+      var left = g2.right - ow - g2.iconGap - drawn;
+      var k = g2.pinSize / Icons.UPEM;
       pin.parentNode.setAttribute('transform', 'translate(' + f(left) + ' '
-        + f(a.baseline + a.pinDrop) + ') scale(' + k.toFixed(6) + ' ' + (-k).toFixed(6) + ')');
+        + f(g2.baseline + g2.pinDrop) + ') scale(' + k.toFixed(6) + ' ' + (-k).toFixed(6) + ')');
     }
+
+    // Caches blancs : ils couvrent exactement le texte qu'ils protègent.
+    fitMask(svgEl, 'mask-rows-', 'row-', g.rows.size, g.rows.iconX);
+    fitMask(svgEl, 'mask-addr-', 'addr-', g2.size, null);
+  }
+
+  /**
+   * Étend un cache blanc sous un groupe de lignes de texte, à partir de leur
+   * position et de leur largeur réelles.
+   */
+  function fitMask(svgEl, maskPrefix, textPrefix, size, leftEdge) {
+    var mask = svgEl.querySelector('rect[class^="' + maskPrefix + '"]');
+    var items = svgEl.querySelectorAll('[class^="' + textPrefix + '"]');
+    if (!mask || !items.length) return;
+    var m = GEO.verso.mask;
+    var x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    try {
+      Array.prototype.forEach.call(items, function (el) {
+        var w = el.getComputedTextLength();
+        var anchor = el.getAttribute('text-anchor');
+        var x = parseFloat(el.getAttribute('x'));
+        var y = parseFloat(el.getAttribute('y'));
+        var s = parseFloat(el.getAttribute('font-size')) || size;
+        var left = anchor === 'end' ? x - w : x;
+        x0 = Math.min(x0, left); x1 = Math.max(x1, left + w);
+        y0 = Math.min(y0, y - s * m.rise); y1 = Math.max(y1, y + s * m.drop);
+      });
+    } catch (e) { return; }
+    if (leftEdge != null) x0 = Math.min(x0, leftEdge);
+    mask.setAttribute('x', f(x0 - m.pad));
+    mask.setAttribute('y', f(y0));
+    mask.setAttribute('width', f(x1 - x0 + m.pad * 2));
+    mask.setAttribute('height', f(y1 - y0));
   }
 
   /**
