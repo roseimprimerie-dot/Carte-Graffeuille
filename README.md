@@ -9,7 +9,7 @@ dépendance externe.
 
 Double-cliquer sur `editeur.html`. Pas de serveur, pas de `localhost`, pas de
 connexion : tout se charge depuis le dossier, y compris les fontes, et rien ne
-sort du disque. Vérifié réseau coupé.
+sort du disque. Vérifié réseau coupé. **https://roseimprimerie-dot.github.io/Carte-Graffeuille/editeur.html**
 
 ## Ce qu'il produit
 
