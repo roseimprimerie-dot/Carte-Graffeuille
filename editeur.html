@@ -142,15 +142,16 @@
         <div class="grid">
           <div class="field full">
             <label for="siteBase">Adresse du site publié</label>
-            <input type="url" id="siteBase" name="siteBase" placeholder="https://exemple.fr/cartes/">
-            <span class="hint">C’est le domaine où la page publique est en ligne.
-              À renseigner avant d’imprimer : le QR pointe vers cette adresse.</span>
+            <input type="url" id="siteBase" name="siteBase" placeholder="https://graffeuille.github.io/CDV/">
+            <span class="hint">Laisser vide pour le site officiel,
+              <code>https://graffeuille.github.io/CDV/</code>. À ne renseigner que
+              pour viser un autre hébergement.</span>
           </div>
           <div class="field full">
             <label for="slug">Identifiant de la personne</label>
             <input type="text" id="slug" name="slug" placeholder="prenom-nom">
             <span class="hint">Donne à la personne son adresse propre,
-              <code>…/equipe/prenom-nom/</code> : une URL courte, donc un QR bien
+              <code>…/CDV/prenom-nom</code> : une URL courte, donc un QR bien
               plus lisible. Laisser vide pour que le QR porte lui-même les
               coordonnées.</span>
           </div>
@@ -205,7 +206,8 @@
       <div class="panel-body">
         <div class="roster" id="roster"></div>
         <div class="exports">
-          <button type="button" id="btn-export-card" class="ghost">Fiche pour le site (.json)</button>
+          <button type="button" id="btn-export-folder" class="primary">Créer la carte en ligne (.zip)</button>
+          <button type="button" id="btn-export-card" class="ghost">Fiche seule (.json)</button>
           <button type="button" id="btn-export-json" class="ghost">Exporter l’annuaire (.json)</button>
           <button type="button" id="btn-import-json" class="ghost">Importer un annuaire</button>
           <input type="file" id="file-json" accept="application/json,.json" hidden>
@@ -247,6 +249,7 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="assets/js/qrcode.js"></script>
+<script src="assets/js/zip.js"></script>
 <script src="assets/js/icons.js"></script>
 <script src="assets/js/logo.js"></script>
 <script src="assets/js/contact.js"></script>
