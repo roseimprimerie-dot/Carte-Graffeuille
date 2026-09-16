@@ -362,7 +362,16 @@
     try { last = localStorage.getItem(LAST_KEY); } catch (e) { /* sans effet */ }
     var entry = last && roster.filter(function (r) { return r.id === last; })[0];
 
-    if (shared) { writeForm(normalise(shared)); toast('Carte chargée depuis le lien partagé.'); }
+    if (shared) {
+      writeForm(normalise(shared));
+      toast('Carte chargée depuis le lien partagé.');
+      // Le fragment est consommé, puis retiré de l'adresse. Laissé en place il
+      // se recharge à chaque F5 et reprend la main sur l'annuaire comme sur
+      // les valeurs par défaut : vider le stockage n'y change rien, et rien
+      // dans la page ne permet d'en sortir.
+      try { history.replaceState(null, '', location.pathname + location.search); }
+      catch (e) { location.hash = ''; }
+    }
     else if (entry) { currentId = entry.id; writeForm(entry.data); }
     else writeForm(DEFAULTS);
 
