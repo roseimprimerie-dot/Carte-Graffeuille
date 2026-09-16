@@ -132,9 +132,9 @@
       var verdict = module >= 0.40 ? 'très confortable à scanner'
                   : module >= 0.30 ? 'confortable à scanner'
                   : module >= 0.25 ? 'lisible, mais sans marge : préférez un identifiant court'
-                  : 'trop dense pour un tirage à cette taille — renseignez un identifiant court';
+                  : 'trop dense pour un tirage à cette taille - renseignez un identifiant court';
       box.innerHTML = line + url.length + ' caractères · version ' + qr.version
-        + ' · module de ' + module.toFixed(2) + ' mm une fois imprimé — ' + verdict + '.';
+        + ' · module de ' + module.toFixed(2) + ' mm une fois imprimé - ' + verdict + '.';
     } catch (err) {
       box.innerHTML = line + 'Adresse trop longue pour tenir dans un QR code.';
     }

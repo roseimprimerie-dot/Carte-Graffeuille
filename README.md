@@ -2,7 +2,7 @@
 
 Ce dépôt ne contient plus que l'éditeur : `editeur.html`, ouvert dans un
 navigateur, compose la carte 54 × 85 mm au format du fichier d'impression et
-l'exporte. Tout tourne côté client — pas de serveur, pas de compte, pas de
+l'exporte. Tout tourne côté client - pas de serveur, pas de compte, pas de
 dépendance externe.
 
 ## Ouvrir l'éditeur
@@ -65,8 +65,8 @@ cp -r assets/     <depot-des-pages>/assets/
 cp -r outils/     <depot-des-pages>/outils/
 ```
 
-`cp -r` fusionne : les fichiers propres aux pages publiques — `carte.js`,
-`carte.css`, les SVG de logo — restent en place, ils n'existent pas ici.
+`cp -r` fusionne : les fichiers propres aux pages publiques - `carte.js`,
+`carte.css`, les SVG de logo - restent en place, ils n'existent pas ici.
 `fonts.css` est volontairement un sur-ensemble : il déclare aussi Archivo,
 dont seules les pages publiques se servent, pour que l'écrasement ne leur
 retire rien.

@@ -122,7 +122,7 @@ window.Contact = (function () {
     ];
     if (d.company) lines.push('ORG:' + d.company);
     // TITLE ne tient que sur une ligne, là où la carte imprimée peut en avoir deux.
-    var title = [d.role, d.department].filter(Boolean).join(' — ').split('\n').join(' ');
+    var title = [d.role, d.department].filter(Boolean).join(' - ').split('\n').join(' ');
     if (title) lines.push('TITLE:' + title);
     if (d.phone) lines.push('TEL;TYPE=' + telType(d.phone) + ':' + e164(d.phone));
     if (d.street || d.city) {
