@@ -382,11 +382,80 @@
    * Rend un QR code sous forme de chemin SVG unique, normalisé dans un carré
    * de `extent` unités (marge silencieuse de 4 modules comprise).
    */
-  function toSvgPath(text, ecl, extent, quiet) {
+  function n(v) { return Math.round(v * 1000) / 1000; }
+
+  /* Un coin : arc, ou angle droit quand le rayon est nul. */
+  function corner(r, x, y, sweep) {
+    return r > 0 ? 'A' + n(r) + ' ' + n(r) + ' 0 0 ' + sweep + ' ' + n(x) + ' ' + n(y)
+                 : 'L' + n(x) + ' ' + n(y);
+  }
+
+  /**
+   * Rectangle aux quatre coins arrondis du même rayon, sauf `sharp` laissé
+   * droit (0 = haut-gauche, 1 = haut-droit, 2 = bas-droit, 3 = bas-gauche).
+   * `ccw` le décrit dans l'autre sens : deux tracés de sens opposés dans un
+   * même chemin se soustraient, ce qui creuse l'anneau des repères sans
+   * recourir à evenodd — qui, lui, ferait disparaître tout chevauchement.
+   */
+  function roundedRect(x, y, w, h, r, sharp, ccw) {
+    var rr = [r, r, r, r];
+    if (sharp != null) rr[sharp] = 0;
+    var tl = rr[0], tr = rr[1], br = rr[2], bl = rr[3];
+    if (!ccw) {
+      return 'M' + n(x + tl) + ' ' + n(y)
+           + 'H' + n(x + w - tr) + corner(tr, x + w, y + tr, 1)
+           + 'V' + n(y + h - br) + corner(br, x + w - br, y + h, 1)
+           + 'H' + n(x + bl) + corner(bl, x, y + h - bl, 1)
+           + 'V' + n(y + tl) + corner(tl, x + tl, y, 1) + 'Z';
+    }
+    return 'M' + n(x + tl) + ' ' + n(y)
+         + corner(tl, x, y + tl, 0)
+         + 'V' + n(y + h - bl) + corner(bl, x + bl, y + h, 0)
+         + 'H' + n(x + w - br) + corner(br, x + w, y + h - br, 0)
+         + 'V' + n(y + tr) + corner(tr, x + w - tr, y, 0)
+         + 'H' + n(x + tl) + 'Z';
+    }
+
+  /**
+   * Variante à modules ronds, celle de la carte d'origine : chaque module
+   * sombre devient un disque du diamètre d'un module, et les trois repères
+   * d'angle deviennent un anneau et un noyau en carré arrondi. Le coin qui
+   * pointe vers le centre du code reste droit.
+   *
+   * Un disque ne couvre que 79 % de l'aire du carré qu'il remplace : la
+   * lecture s'en trouve un peu moins tolérante, d'où le contrôle au décodeur
+   * après rendu plutôt qu'une confiance aveugle.
+   */
+  function dotsPath(qr, unit, quiet) {
+    var d = [], r = unit / 2, far = qr.size - 7;
+    for (var y = 0; y < qr.size; y++) {
+      for (var x = 0; x < qr.size; x++) {
+        var repere = (x < 7 || x >= far) && y < 7 || x < 7 && y >= far;
+        if (!qr.modules[y][x] || repere) continue;
+        var cx = (x + quiet + 0.5) * unit, cy = (y + quiet + 0.5) * unit;
+        d.push('M' + n(cx - r) + ' ' + n(cy)
+             + 'a' + n(r) + ' ' + n(r) + ' 0 1 0 ' + n(2 * r) + ' 0'
+             + 'a' + n(r) + ' ' + n(r) + ' 0 1 0 ' + n(-2 * r) + ' 0Z');
+      }
+    }
+    // Coin droit tourné vers le centre : bas-droit, bas-gauche, haut-droit.
+    [[0, 0, 2], [far, 0, 3], [0, far, 1]].forEach(function (rep) {
+      var ox = (rep[0] + quiet) * unit, oy = (rep[1] + quiet) * unit, sharp = rep[2];
+      d.push(roundedRect(ox, oy, 7 * unit, 7 * unit, 3 * unit, sharp, false));
+      d.push(roundedRect(ox + unit, oy + unit, 5 * unit, 5 * unit, 2 * unit, sharp, true));
+      d.push(roundedRect(ox + 2 * unit, oy + 2 * unit, 3 * unit, 3 * unit, 1.2 * unit, sharp, false));
+    });
+    return d.join('');
+  }
+
+  function toSvgPath(text, ecl, extent, quiet, style) {
     var qr = encode(text, ecl);
     quiet = quiet == null ? 4 : quiet;
     var total = qr.size + quiet * 2;
     var unit = extent / total;
+    if (style === 'dots') {
+      return { path: dotsPath(qr, unit, quiet), version: qr.version, size: qr.size };
+    }
     var d = [];
     for (var y = 0; y < qr.size; y++) {
       var x = 0;

@@ -29,6 +29,7 @@ window.Contact = (function () {
     showBaseline: true,
     accent: '#ff1900',
     qrLevel: 'M',
+    qrStyle: 'dots',
     watermark: true,
     bleed: false,
     slug: '',

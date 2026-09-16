@@ -258,7 +258,8 @@
 
     // QR code : il mène à la page publique, régénéré à chaque modification.
     try {
-      var qr = QRCode.toSvgPath(d.qrPayload || '', d.qrLevel || 'M', g.qr.size, 4);
+      var qr = QRCode.toSvgPath(d.qrPayload || '', d.qrLevel || 'M', g.qr.size, 4,
+                                d.qrStyle || 'dots');
       out.push('<rect x="' + f(g.qr.x) + '" y="' + f(g.qr.y) + '" width="' + f(g.qr.size)
              + '" height="' + f(g.qr.size) + '" fill="#FFFFFF"/>');
       out.push('<g transform="translate(' + f(g.qr.x) + ' ' + f(g.qr.y) + ')">'
