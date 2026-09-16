@@ -11,6 +11,18 @@ Double-cliquer sur `editeur.html`. Pas de serveur, pas de `localhost`, pas de
 connexion : tout se charge depuis le dossier, y compris les fontes, et rien ne
 sort du disque. Vérifié réseau coupé. **https://roseimprimerie-dot.github.io/Carte-Graffeuille/editeur.html**
 
+## Après chaque modification d'un fichier de assets/
+
+```sh
+python3 outils/empreinte.py
+```
+
+Cette commande suffixe chaque feuille de style et chaque script de
+`editeur.html` par l'empreinte de son contenu. Sans elle, un navigateur peut
+resservir un ancien `assets/js/contact.js` après une mise en ligne : la page
+est à jour, son code ne l'est pas, et une valeur corrigée réapparaît sans que
+rien ne le signale. Lancer la commande avant de pousser, et c'est réglé.
+
 ## Ce qu'il produit
 
 | Bouton | Fichier |
