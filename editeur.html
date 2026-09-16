@@ -175,14 +175,16 @@
         <div class="grid">
           <div class="field">
             <label for="accent">Couleur d’accent</label>
-            <input type="color" id="accent" name="accent" value="#ff1900">
-            <div class="swatches" id="swatches"></div>
+            <div class="accent-row">
+              <input type="color" id="accent" name="accent" value="#ff1900">
+              <div class="swatches" id="swatches"></div>
+            </div>
           </div>
           <div class="field">
             <label for="qrStyle">Modules du QR</label>
             <select id="qrStyle" name="qrStyle">
-              <option value="dots" selected>Ronds (comme la carte d’origine)</option>
-              <option value="square">Carrés (le plus de matière à l’impression)</option>
+              <option value="dots" selected>Ronds (carte d’origine)</option>
+              <option value="square">Carrés (plus de matière)</option>
             </select>
           </div>
           <div class="field">

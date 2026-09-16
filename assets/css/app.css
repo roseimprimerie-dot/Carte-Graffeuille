@@ -232,7 +232,11 @@ input[type="color"] {
 }
 .check input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
 
-.swatches { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 8px; }
+/* Le sélecteur et la pastille sur une seule ligne : la pastille pendait sous
+   le champ et décalait la rangée par rapport au champ voisin. */
+.accent-row { display: flex; align-items: stretch; gap: 8px; }
+.accent-row input[type="color"] { flex: 1 1 auto; min-width: 0; }
+.swatches { display: flex; gap: 7px; flex-wrap: wrap; }
 .swatch {
   width: 26px; height: 26px;
   border-radius: 6px;
@@ -371,6 +375,46 @@ input[type="color"] {
 /* Panneau étroit (téléphone, aperçu intégré) : l'aperçu devient un bandeau
  * fixe en haut et le formulaire remonte juste en dessous, pour que les champs
  * soient visibles sans avoir à faire défiler la page. */
+/* ------------------------------------------------------------ ordinateur */
+
+/* L'éditeur s'emploie sur un poste de travail. Au-delà de 1200 px, la place
+ * gagnée va à la carte — c'est elle qu'on juge — plutôt qu'à des champs
+ * étirés sur toute la largeur pour y loger un code postal. */
+@media (min-width: 1200px) {
+  .layout {
+    max-width: 1580px;
+    grid-template-columns: minmax(0, 1fr) minmax(400px, 36%);
+    gap: 32px;
+    padding: 24px 32px 64px;
+  }
+  .cards { padding: 26px 22px; gap: 22px; }
+  .card-slot { flex: 1 1 0; min-width: 0; }
+  /* Le SVG vit dans un div intermédiaire que align-items: center empêche de
+     s'étirer : sans cette ligne son width:100% se calcule sur sa propre
+     largeur intrinsèque de 54 mm, et la vignette reste à 204 px. */
+  .card-slot > div { width: 100%; }
+  .card-slot .card-svg { width: 100%; }
+  .card-slot figcaption { font-size: 11px; }
+}
+
+/* Plus large encore : les panneaux se rangent sur deux colonnes alignées, et
+ * le formulaire cesse de dérouler deux mètres et demi de page. L'annuaire,
+ * dernier panneau, tient la largeur entière. */
+@media (min-width: 1360px) {
+  .form-col {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+  /* Les panneaux d'une même rangée finissent à la même hauteur : laissés à
+     leur hauteur propre, leurs bords bas se décalaient d'une colonne à
+     l'autre et la grille cessait de se lire comme une grille. */
+  .form-col > .panel { display: flex; flex-direction: column; }
+  .form-col > .panel .panel-body { flex: 1 1 auto; }
+  .form-col > .panel { margin: 0; }
+  .form-col > .panel:last-child { grid-column: 1 / -1; }
+}
+
 /* Dès que le bandeau se replie sur plusieurs rangs il devient haut : collant,
  * il masquerait les premiers champs. On le laisse donc défiler. */
 @media (max-width: 1000px) {
