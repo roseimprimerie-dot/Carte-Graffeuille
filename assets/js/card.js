@@ -14,10 +14,13 @@
       logo:       { x: 3.10, y: 17.83, width: 47.49 },
       // Diagonale blanche, d'un bord à l'autre du fond perdu.
       diagonal:   { x1: -15.06, y1: 61.62, x2: 36.90, y2: -3.22, width: 0.227 },
-      arrow:      { x: 4.76, y: 51.04, size: 1.82 },
+      // Coin haut-gauche du carré de la flèche, et son côté.
+      arrow:      { x: 4.91, y: 49.33, size: 1.71 },
       tagline:    { x: 6.97, baseline: 50.99, lead: 2.88, size: 2.402 },
       address:    { right: 48.15, baseline: 72.70, lead: 3.17, size: 2.398,
-                    companySize: 3.034, iconGap: 1.18, pinSize: 3.45, pinDrop: 0.63,
+                    // L'épingle est calée sur la hauteur des capitales de la raison
+                    // sociale : 0,57 mm au-dessus, pointe 0,36 mm sous la ligne de base.
+                    companySize: 3.034, iconGap: 1.18, pinSize: 3.65, pinDrop: 0.12,
                     rule: { x: 50.68, top: 68.36, bottom: 80.61, width: 0.245 } }
     },
     verso: {
@@ -78,16 +81,27 @@
     return '<text ' + a.join(' ') + '>' + esc(str) + '</text>';
   }
 
-  // Flèche diagonale du recto, redessinée en vectoriel (elle est un glyphe
-  // dans le fichier d'origine, donc non reproductible sans la fonte).
-  function arrow(g, color, angle) {
-    var s = g.size, th = s * 0.14, head = s * 0.38, half = s * 0.26;
-    var d = 'M0 ' + f(-th / 2) + 'H' + f(s - head) + 'V' + f(-half)
-          + 'L' + f(s) + ' 0L' + f(s - head) + ' ' + f(half)
-          + 'V' + f(th / 2) + 'H0Z';
-    return '<g transform="translate(' + f(g.x) + ' ' + f(g.y) + ') rotate('
-         + (angle == null ? 45 : angle) + ')">'
-         + '<path d="' + d + '" fill="' + color + '"/></g>';
+  /**
+   * Flèche montante du recto. Relevée au pixel sur la maquette : un carré dont
+   * le bord haut et le bord droit sont pleins, traversé par sa diagonale. Les
+   * trois barres ont la même épaisseur, un quart du côté. Ce n'est pas une
+   * flèche à pointe triangulaire, et elle ne se construit pas par rotation :
+   * ses bouts sont coupés droit, pas en biseau.
+   *
+   * `g.x` et `g.y` désignent le coin haut-gauche du carré.
+   */
+  function arrow(g, color) {
+    var s = g.size, t = s / 4, r = s - t;
+    // L'équerre : barre haute sur toute la largeur, barre droite sur toute la hauteur.
+    var d = 'M0 0H' + f(s) + 'V' + f(s) + 'H' + f(r) + 'V' + f(t) + 'H0Z';
+    // La diagonale, d'épaisseur t, du coin bas-gauche au coin intérieur de
+    // l'équerre — pas jusqu'au coin haut-droit, sinon son bout coupé droit
+    // déborderait du carré et écornerait l'angle, que la maquette a net.
+    var h = t / (2 * Math.SQRT2);
+    d += 'M' + f(-h) + ' ' + f(s - h) + 'L' + f(r - h) + ' ' + f(t - h)
+       + 'L' + f(r + h) + ' ' + f(t + h) + 'L' + f(h) + ' ' + f(s + h) + 'Z';
+    return '<g transform="translate(' + f(g.x) + ' ' + f(g.y) + ')">'
+         + '<path d="' + d + '" fill="' + color + '" fill-rule="nonzero"/></g>';
   }
 
   function cropMarks(color) {
@@ -157,7 +171,7 @@
                   .map(function (l) { return l.trim(); })
                   .filter(Boolean);
     if (lines.length) {
-      out.push(arrow(g.arrow, ink, -45));
+      out.push(arrow(g.arrow, ink));
       lines.forEach(function (line, i) {
         out.push(text(line, { x: g.tagline.x, y: g.tagline.baseline + i * g.tagline.lead,
                               size: g.tagline.size, fill: ink, weight: 600,

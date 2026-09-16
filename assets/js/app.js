@@ -9,7 +9,9 @@
 
   var DEFAULTS = Contact.DEFAULTS;
 
-  var SWATCHES = ['#ff1900', '#b01d16', '#1f2937', '#0f4c81', '#0b7a5a', '#c2410c'];
+  // Le rouge de la charte, et lui seul : orange #ff1900, RVB 255 25 0,
+  // CMJN 0 95 95 0, Pantone 805U. La pastille sert à y revenir après un essai.
+  var SWATCHES = ['#ff1900'];
 
   var FIELDS = Contact.FIELDS.concat(['siteBase']);
 
@@ -336,8 +338,8 @@
       b.type = 'button';
       b.className = 'swatch';
       b.style.background = color;
-      b.title = color;
-      b.setAttribute('aria-label', 'Couleur ' + color);
+      b.title = 'Rouge de la charte ' + color;
+      b.setAttribute('aria-label', 'Rouge de la charte ' + color);
       b.addEventListener('click', function () {
         form.elements.accent.value = color;
         update();

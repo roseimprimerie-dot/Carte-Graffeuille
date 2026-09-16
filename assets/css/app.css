@@ -56,17 +56,34 @@ body {
 
 /* ---------------------------------------------------------------- en-tête */
 
+/* Trois colonnes égales sur les bords : le sous-titre tombe au milieu du
+   bandeau, et non au milieu de ce qui reste entre le titre et les boutons. */
 .topbar {
   position: sticky;
   top: 0;
   z-index: 20;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   gap: 12px;
   align-items: center;
   padding: 12px 20px;
   background: var(--panel);
   border-bottom: 1px solid var(--line);
+}
+
+.topbar-sub {
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+/* Sous 860 px les trois blocs ne tiennent plus côte à côte : ils s'empilent,
+   le sous-titre reste centré. */
+@media (max-width: 860px) {
+  .topbar { grid-template-columns: 1fr; justify-items: center; }
+  .topbar h1 { justify-content: center; }
 }
 
 .topbar h1 {
@@ -84,15 +101,12 @@ body {
   background: var(--accent);
 }
 
-.topbar h1 small {
-  font-weight: 400;
-  color: var(--ink-faint);
-  font-size: 13px;
+.topbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
 }
-
-.topbar .spacer { flex: 1 1 auto; }
-
-.topbar-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
 /* ------------------------------------------------------------------ boutons */
 
