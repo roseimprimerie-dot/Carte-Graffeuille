@@ -5,12 +5,16 @@
   // (60 x 91 mm pour un format coupé de 54 x 85). Les traits de coupe partent
   // du bord coupé et traversent ce fond perdu : la page doit donc être plus
   // grande que lui, d'où une marge propre aux traits.
-  var TRIM_W = 54, TRIM_H = 85, BLEED = 3, MARK_LEN = 6, MARK_PAD = 2;
+  var TRIM_W = 54, TRIM_H = 85, BLEED = 3;
+  // Les deux traits d'un même coin partent à MARK_GAP du bord coupé, donc ne
+  // se rejoignent pas : un angle fermé désigne mal le point de coupe, et c'est
+  // un angle ouvert que porte le fichier de référence.
+  var MARK_GAP = 2, MARK_LEN = 5, MARK_PAD = 1;
 
   /** Marge de la page : le fond perdu seul, ou de quoi loger les traits. */
   function margin(opts) {
     if (!opts.bleed) return 0;
-    return opts.marks ? MARK_LEN + MARK_PAD : BLEED;
+    return opts.marks ? MARK_GAP + MARK_LEN + MARK_PAD : BLEED;
   }
 
   /** Format de la page produite, en millimètres, traits de coupe compris. */
@@ -122,18 +126,21 @@
    * fichier de référence.
    */
   function cropMarks() {
-    var L = MARK_LEN, w = 0.15, pad = 0.25, fonds = [], traits = [];
+    var G = MARK_GAP, L = MARK_LEN, w = 0.15, pad = 0.25, fonds = [], traits = [];
     function fond(x, y, bw, bh) {
       fonds.push('<rect x="' + f(x) + '" y="' + f(y) + '" width="' + f(bw)
                + '" height="' + f(bh) + '" fill="#FFFFFF"/>');
     }
     [[0, 0], [TRIM_W, 0], [0, TRIM_H], [TRIM_W, TRIM_H]].forEach(function (c) {
       var sx = c[0] === 0 ? -1 : 1, sy = c[1] === 0 ? -1 : 1;
-      var x2 = c[0] + sx * L, y2 = c[1] + sy * L;
-      fond(Math.min(c[0], x2), c[1] - w / 2 - pad, L, w + pad * 2);
-      fond(c[0] - w / 2 - pad, Math.min(c[1], y2), w + pad * 2, L);
-      traits.push('M' + f(c[0]) + ' ' + f(c[1]) + 'H' + f(x2));
-      traits.push('M' + f(c[0]) + ' ' + f(c[1]) + 'V' + f(y2));
+      // Trait horizontal, posé sur la ligne de coupe haute ou basse.
+      var x1 = c[0] + sx * G, x2 = c[0] + sx * (G + L);
+      fond(Math.min(x1, x2), c[1] - w / 2 - pad, L, w + pad * 2);
+      traits.push('M' + f(x1) + ' ' + f(c[1]) + 'H' + f(x2));
+      // Trait vertical, posé sur la ligne de coupe gauche ou droite.
+      var y1 = c[1] + sy * G, y2 = c[1] + sy * (G + L);
+      fond(c[0] - w / 2 - pad, Math.min(y1, y2), w + pad * 2, L);
+      traits.push('M' + f(c[0]) + ' ' + f(y1) + 'V' + f(y2));
     });
     return fonds.join('') + '<path d="' + traits.join('') + '" fill="none" '
          + 'stroke="#000000" stroke-width="' + f(w) + '"/>';

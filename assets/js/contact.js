@@ -21,7 +21,7 @@ window.Contact = (function () {
     website: 'www.graffeuille.fr',
     websiteInContacts: false,
     company: 'GRAFFEUILLE',
-    street: '120, Rte de Saint-Jean d’Angély',
+    street: 'Rte de Saint-Jean d’Angély',
     postalCode: '16170',
     city: 'Rouillac',
     country: 'France',
