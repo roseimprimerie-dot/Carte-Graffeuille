@@ -104,16 +104,18 @@
     Card.frontInto(front, view, { bleed: state.bleed, marks: state.bleed });
     Card.backInto(back, view, { bleed: state.bleed, marks: state.bleed });
 
-    // Le format de page suit l'option de fond perdu.
-    var w = Card.TRIM_W + (state.bleed ? Card.BLEED * 2 : 0);
-    var h = Card.TRIM_H + (state.bleed ? Card.BLEED * 2 : 0);
-    $('#print-page').textContent = '@page { margin: 0; size: ' + w + 'mm ' + h + 'mm; }';
+    // Le format de page suit l'option de fond perdu, et laisse la place aux
+    // traits de coupe quand ils sont demandés.
+    var page = Card.pageSize({ bleed: state.bleed, marks: state.bleed });
+    $('#print-page').textContent =
+      '@page { margin: 0; size: ' + page.w + 'mm ' + page.h + 'mm; }';
 
     describeQr(url);
 
     $('#meta').innerHTML =
       'Format coupé <code>54 × 85 mm</code>'
-      + (state.bleed ? ' · fond perdu <code>5 mm</code> · traits de coupe' : '')
+      + (state.bleed ? ' · fond perdu <code>3 mm</code> · traits de coupe · page <code>'
+          + page.w + ' × ' + page.h + ' mm</code>' : '')
       + '. Le QR mène à la page publique, pas à une fiche figée : corriger un '
       + 'numéro sur le site met à jour toutes les cartes déjà distribuées.';
   }
@@ -239,8 +241,10 @@
     return Promise.resolve(window.CARD_FONTS_CSS || null);
   }
 
+  /* Tout ce qui sort d'ici part à l'impression : le noir du verso doit y être
+     pur, et non le gris très sombre confortable à l'écran. */
   function sideSvg(side, withFont) {
-    var opts = { bleed: state.bleed, marks: state.bleed };
+    var opts = { bleed: state.bleed, marks: state.bleed, print: true };
     var view = Object.assign({}, state, { qrPayload: Contact.cardUrl(siteRoot(state), state) });
     var markup;
     var host = document.createElement('div');
@@ -273,9 +277,8 @@
 
   function exportPng() {
     var dpi = 600;
-    var w = Card.TRIM_W + (state.bleed ? Card.BLEED * 2 : 0);
-    var h = Card.TRIM_H + (state.bleed ? Card.BLEED * 2 : 0);
-    var px = Math.round(w / 25.4 * dpi), py = Math.round(h / 25.4 * dpi);
+    var page = Card.pageSize({ bleed: state.bleed, marks: state.bleed });
+    var px = Math.round(page.w / 25.4 * dpi), py = Math.round(page.h / 25.4 * dpi);
 
     inlineFont().then(function (css) {
       var chain = Promise.resolve();

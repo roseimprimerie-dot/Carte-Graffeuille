@@ -1,27 +1,43 @@
 (function (global) {
   'use strict';
 
-  var TRIM_W = 54, TRIM_H = 85, BLEED = 5, MARK_LEN = 5, MARK_GAP = 2;
+  // Fond perdu de 3 mm, conforme à la BleedBox du fichier d'impression fourni
+  // (60 x 91 mm pour un format coupé de 54 x 85). Les traits de coupe partent
+  // du bord coupé et traversent ce fond perdu : la page doit donc être plus
+  // grande que lui, d'où une marge propre aux traits.
+  var TRIM_W = 54, TRIM_H = 85, BLEED = 3, MARK_LEN = 6, MARK_PAD = 2;
 
-  // Repères verticaux repris des anciennes cartes
-  
+  /** Marge de la page : le fond perdu seul, ou de quoi loger les traits. */
+  function margin(opts) {
+    if (!opts.bleed) return 0;
+    return opts.marks ? MARK_LEN + MARK_PAD : BLEED;
+  }
+
+  /** Format de la page produite, en millimètres, traits de coupe compris. */
+  function pageSize(opts) {
+    var m = margin(opts || {});
+    return { w: TRIM_W + m * 2, h: TRIM_H + m * 2, margin: m };
+  }
+
   var GEO = {
-    // Recto, relevé sur CDV-Graffeuille-Recto.ai. Sa composition ne varie pas
-    // d'une personne à l'autre : seules l'accroche et l'adresse en sortent.
+    // Recto, relevé sur CDV-Graffeuille-Recto.pdf. Il ne porte que le fond
+    // rouge, la diagonale, le logo, la flèche et l'accroche : ni bloc adresse
+    // ni filet, contrairement à la maquette précédente. Sa composition ne
+    // varie pas d'une personne à l'autre, hors accroche.
     recto: {
-      font:       "'Montserrat','Helvetica Neue',Helvetica,Arial,sans-serif",
-      // Le logo vectoriel est remis à l'échelle du bloc de la maquette.
-      logo:       { x: 3.10, y: 17.83, width: 47.49 },
-      // Diagonale blanche, d'un bord à l'autre du fond perdu.
-      diagonal:   { x1: -15.06, y1: 61.62, x2: 36.90, y2: -3.22, width: 0.227 },
+      font:       "'Author','Helvetica Neue',Helvetica,Arial,sans-serif",
+      // Les tracés du logo sont déjà dans le repère de cette maquette : le
+      // bloc les reprend tel quel, sans mise à l'échelle.
+      logo:       { x: 3.748, y: 22.773, width: 46.503 },
+      // Diagonale blanche, d'un bord à l'autre, tracée à 0,262 pt.
+      diagonal:   { x1: -3.113, y1: 52.383, x2: 41.585, y2: -3.219, width: 0.0924 },
       // Coin haut-gauche du carré de la flèche, et son côté.
-      arrow:      { x: 4.91, y: 49.33, size: 1.71 },
-      tagline:    { x: 6.97, baseline: 50.99, lead: 2.88, size: 2.402 },
-      address:    { right: 48.15, baseline: 72.70, lead: 3.17, size: 2.398,
-                    // L'épingle est calée sur la hauteur des capitales de la raison
-                    // sociale : 0,57 mm au-dessus, pointe 0,36 mm sous la ligne de base.
-                    companySize: 3.034, iconGap: 1.18, pinSize: 3.65, pinDrop: 0.12,
-                    rule: { x: 50.68, top: 68.36, bottom: 80.61, width: 0.245 } }
+      arrow:      { x: 6.510, y: 55.748, size: 2.6525 },
+      // Accroche en Author Medium 9 pt, interligne 11,111 pt. Le fichier
+      // resserre l'approche de 0,009 cadratin par signe et la rend aux
+      // espaces : sans cela les deux lignes sortent 2 % trop larges.
+      tagline:    { x: 6.357, baseline: 62.136, lead: 3.528, size: 3.175,
+                    weight: 500, tracking: -0.009 }
     },
     verso: {
       qr:         { x: 6.11, y: 5.83, size: 24.19 },
@@ -75,6 +91,7 @@
     if (opts.italic) a.push('font-style="italic"');
     if (opts.anchor) a.push('text-anchor="' + opts.anchor + '"');
     if (opts.spacing) a.push('letter-spacing="' + f(opts.spacing) + '"');
+    if (opts.wordSpacing) a.push('word-spacing="' + f(opts.wordSpacing) + '"');
     if (opts.id) a.push('id="' + opts.id + '"');
     if (opts.cls) a.push('class="' + opts.cls + '"');
     if (opts.data) a.push(opts.data);
@@ -82,82 +99,99 @@
   }
 
   /**
-   * Flèche montante du recto. Relevée au pixel sur la maquette : un carré dont
-   * le bord haut et le bord droit sont pleins, traversé par sa diagonale. Les
-   * trois barres ont la même épaisseur, un quart du côté. Ce n'est pas une
-   * flèche à pointe triangulaire, et elle ne se construit pas par rotation :
-   * ses bouts sont coupés droit, pas en biseau.
+   * Flèche du recto, pointant vers le bas-droite. Le tracé est relevé tel quel
+   * dans le flux du fichier d'impression, ramené à un carré unité : le
+   * reconstruire à partir de règles donnerait une forme approchante, alors que
+   * ses barres n'ont pas tout à fait la même épaisseur que sa diagonale.
    *
-   * `g.x` et `g.y` désignent le coin haut-gauche du carré.
+   * `g.x` et `g.y` désignent le coin haut-gauche du carré, `g.size` son côté.
    */
+  var ARROW = 'M0.99867 0.17662L1 0.99867L0.17941 0.99867L0.17941 0.79558'
+            + 'L0.62867 0.79412L0 0.16545L0.16558 0L0.79558 0.63L0.79558 0.17662Z';
+
   function arrow(g, color) {
-    var s = g.size, t = s / 4, r = s - t;
-    // L'équerre : barre haute sur toute la largeur, barre droite sur toute la hauteur.
-    var d = 'M0 0H' + f(s) + 'V' + f(s) + 'H' + f(r) + 'V' + f(t) + 'H0Z';
-    // La diagonale, d'épaisseur t, du coin bas-gauche au coin intérieur de
-    // l'équerre — pas jusqu'au coin haut-droit, sinon son bout coupé droit
-    // déborderait du carré et écornerait l'angle, que la maquette a net.
-    var h = t / (2 * Math.SQRT2);
-    d += 'M' + f(-h) + ' ' + f(s - h) + 'L' + f(r - h) + ' ' + f(t - h)
-       + 'L' + f(r + h) + ' ' + f(t + h) + 'L' + f(h) + ' ' + f(s + h) + 'Z';
-    return '<g transform="translate(' + f(g.x) + ' ' + f(g.y) + ')">'
-         + '<path d="' + d + '" fill="' + color + '" fill-rule="nonzero"/></g>';
+    return '<g transform="translate(' + f(g.x) + ' ' + f(g.y) + ') scale('
+         + (g.size).toFixed(5) + ')">'
+         + '<path d="' + ARROW + '" fill="' + color + '"/></g>';
   }
 
-  function cropMarks(color) {
-    var o = BLEED, L = MARK_LEN, G = MARK_GAP, p = [];
-    function line(x1, y1, x2, y2) {
-      p.push('M' + f(x1) + ' ' + f(y1) + 'L' + f(x2) + ' ' + f(y2));
+  /**
+   * Traits de coupe, noirs sur un petit fond blanc. Ils partent du bord coupé
+   * et traversent le fond perdu : sur l'aplat rouge du recto un trait noir
+   * serait invisible, le fond blanc l'en détache. C'est ainsi que les porte le
+   * fichier de référence.
+   */
+  function cropMarks() {
+    var L = MARK_LEN, w = 0.15, pad = 0.25, fonds = [], traits = [];
+    function fond(x, y, bw, bh) {
+      fonds.push('<rect x="' + f(x) + '" y="' + f(y) + '" width="' + f(bw)
+               + '" height="' + f(bh) + '" fill="#FFFFFF"/>');
     }
     [[0, 0], [TRIM_W, 0], [0, TRIM_H], [TRIM_W, TRIM_H]].forEach(function (c) {
       var sx = c[0] === 0 ? -1 : 1, sy = c[1] === 0 ? -1 : 1;
-      line(c[0] + sx * G, c[1], c[0] + sx * (G + L), c[1]);
-      line(c[0], c[1] + sy * G, c[0], c[1] + sy * (G + L));
+      var x2 = c[0] + sx * L, y2 = c[1] + sy * L;
+      fond(Math.min(c[0], x2), c[1] - w / 2 - pad, L, w + pad * 2);
+      fond(c[0] - w / 2 - pad, Math.min(c[1], y2), w + pad * 2, L);
+      traits.push('M' + f(c[0]) + ' ' + f(c[1]) + 'H' + f(x2));
+      traits.push('M' + f(c[0]) + ' ' + f(c[1]) + 'V' + f(y2));
     });
-    return '<path d="' + p.join('') + '" fill="none" stroke="' + color
-         + '" stroke-width="0.15"/>';
+    return fonds.join('') + '<path d="' + traits.join('') + '" fill="none" '
+         + 'stroke="#000000" stroke-width="' + f(w) + '"/>';
   }
 
   /* ------------------------------------------------------------------ rendu */
 
   function open(opts) {
-    var bleed = opts.bleed ? BLEED : 0;
-    var w = TRIM_W + bleed * 2, h = TRIM_H + bleed * 2;
+    var m = margin(opts);
+    var w = TRIM_W + m * 2, h = TRIM_H + m * 2;
     return '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"'
-         + ' viewBox="' + f(-bleed) + ' ' + f(-bleed) + ' ' + f(w) + ' ' + f(h) + '"'
+         + ' viewBox="' + f(-m) + ' ' + f(-m) + ' ' + f(w) + ' ' + f(h) + '"'
          + ' width="' + f(w) + 'mm" height="' + f(h) + 'mm"'
          + ' class="' + (opts.className || '') + '" role="img"'
          + ' aria-label="' + esc(opts.label || '') + '">';
   }
 
+  /**
+   * Fond : le papier blanc sur toute la page quand elle déborde du fond perdu
+   * pour loger les traits de coupe, puis l'aplat de couleur sur le format
+   * coupé augmenté du seul fond perdu.
+   */
   function background(opts, color) {
-    var bleed = opts.bleed ? BLEED : 0;
-    return '<rect x="' + f(-bleed) + '" y="' + f(-bleed) + '" width="' + f(TRIM_W + bleed * 2)
-         + '" height="' + f(TRIM_H + bleed * 2) + '" fill="' + color + '"/>';
+    var m = margin(opts), bleed = opts.bleed ? BLEED : 0, out = '';
+    if (m > bleed) {
+      out += '<rect x="' + f(-m) + '" y="' + f(-m) + '" width="' + f(TRIM_W + m * 2)
+           + '" height="' + f(TRIM_H + m * 2) + '" fill="#FFFFFF"/>';
+    }
+    return out + '<rect x="' + f(-bleed) + '" y="' + f(-bleed) + '" width="'
+         + f(TRIM_W + bleed * 2) + '" height="' + f(TRIM_H + bleed * 2)
+         + '" fill="' + color + '"/>';
   }
 
-  /** Recto : aplat de couleur, logo, accroche. */
+  /** Recto : aplat rouge, diagonale, logo, flèche et accroche. */
   function renderFront(d, opts) {
     opts = opts || {};
     var g = GEO.recto, accent = d.accent || '#FF1900', ink = d.frontInk || '#FFFFFF';
     var bleed = opts.bleed ? BLEED : 0;
     var uid = 'r' + Math.random().toString(36).slice(2, 8);
-    var out = [open({ bleed: opts.bleed, className: 'card-svg card-front',
+    var out = [open({ bleed: opts.bleed, marks: opts.marks,
+                      className: 'card-svg card-front',
                       label: 'Recto : ' + (d.company || 'GRAFFEUILLE') })];
 
     out.push(background(opts, accent));
 
-    // Diagonale, rognée au format pour qu'elle ne déborde pas du fond perdu.
-    var dg = g.diagonal;
-    out.push('<defs><clipPath id="clipr-' + uid + '"><rect x="' + f(-bleed) + '" y="' + f(-bleed)
-           + '" width="' + f(TRIM_W + bleed * 2) + '" height="' + f(TRIM_H + bleed * 2) + '"/></clipPath></defs>');
-    out.push('<g clip-path="url(#clipr-' + uid + ')"><path d="M' + f(dg.x1) + ' ' + f(dg.y1)
-           + 'L' + f(dg.x2) + ' ' + f(dg.y2) + '" fill="none" stroke="' + ink
-           + '" stroke-width="' + f(dg.width) + '"/></g>');
+    // Tout le dessin est rogné au fond perdu : la page peut être plus grande
+    // que lui pour loger les traits de coupe, rien ne doit y déborder.
+    out.push('<defs><clipPath id="clipr-' + uid + '"><rect x="' + f(-bleed)
+           + '" y="' + f(-bleed) + '" width="' + f(TRIM_W + bleed * 2)
+           + '" height="' + f(TRIM_H + bleed * 2) + '"/></clipPath></defs>');
+    out.push('<g clip-path="url(#clipr-' + uid + ')">');
 
-    // Logo : les tracés sont dans le repère de la carte d'origine, on les
-    // replace et les met à l'échelle du bloc de cette maquette.
-    var src = { x: 3.75, y: 22.76, w: 46.50 };
+    var dg = g.diagonal;
+    out.push('<path d="M' + f(dg.x1) + ' ' + f(dg.y1) + 'L' + f(dg.x2) + ' ' + f(dg.y2)
+           + '" fill="none" stroke="' + ink + '" stroke-width="' + f(dg.width) + '"/>');
+
+    // Les tracés du logo sont déjà dans le repère de cette maquette.
+    var src = { x: 3.748, y: 22.773, w: 46.503 };
     var k = g.logo.width / src.w;
     out.push('<g transform="translate(' + f(g.logo.x) + ' ' + f(g.logo.y) + ') scale('
            + k.toFixed(6) + ') translate(' + f(-src.x) + ' ' + f(-src.y) + ')">'
@@ -166,7 +200,7 @@
            + (d.showBaseline !== false ? '<path d="' + LOGO.tagline + '" fill="' + ink + '"/>' : '')
            + '</g>');
 
-    // Accroche, précédée de sa flèche montante.
+    // Accroche, surmontée de sa flèche.
     var lines = String(d.tagline || '').split('\n')
                   .map(function (l) { return l.trim(); })
                   .filter(Boolean);
@@ -174,36 +208,15 @@
       out.push(arrow(g.arrow, ink));
       lines.forEach(function (line, i) {
         out.push(text(line, { x: g.tagline.x, y: g.tagline.baseline + i * g.tagline.lead,
-                              size: g.tagline.size, fill: ink, weight: 600,
-                              font: g.font }));
+                              size: g.tagline.size, fill: ink, weight: g.tagline.weight,
+                              font: g.font,
+                              spacing: g.tagline.tracking * g.tagline.size,
+                              wordSpacing: -g.tagline.tracking * g.tagline.size }));
       });
     }
 
-    // Bloc adresse, aligné à droite et bordé d'un filet blanc.
-    var a = g.address;
-    var addr = [];
-    if (d.company) addr.push({ str: d.company, size: a.companySize, pin: true });
-    if (d.street) addr.push({ str: d.street, size: a.size });
-    var cityLine = [d.postalCode, d.city].filter(Boolean).join(' ')
-                 + (d.country ? ' - ' + d.country : '');
-    if (cityLine.trim()) addr.push({ str: cityLine.trim(), size: a.size });
-
-    if (addr.length) {
-      addr.forEach(function (line, i) {
-        var y = a.baseline + i * a.lead;
-        out.push(text(line.str, { x: a.right, y: y, size: line.size, fill: ink,
-                                  weight: 600, anchor: 'end', font: g.font,
-                                  id: line.pin ? 'forg-' + uid : null }));
-        if (line.pin) {
-          out.push('<g id="fpin-' + uid + '">'
-                 + icon('pin', 0, y + a.pinDrop, a.pinSize, ink) + '</g>');
-        }
-      });
-      out.push('<path d="M' + f(a.rule.x) + ' ' + f(a.rule.top) + 'V' + f(a.rule.bottom)
-             + '" fill="none" stroke="' + ink + '" stroke-width="' + f(a.rule.width) + '"/>');
-    }
-
-    if (opts.marks) out.push(cropMarks(ink));
+    out.push('</g>');
+    if (opts.marks) out.push(cropMarks());
     out.push('</svg>');
     return out.join('');
   }
@@ -237,13 +250,21 @@
     return parts;
   }
 
-  /** Verso : filigrane, QR vCard, coordonnées. */
+  /**
+   * Verso : filigrane, QR, coordonnées.
+   *
+   * Le noir du texte dépend de la destination. À l'écran un gris très sombre
+   * fatigue moins l'œil ; sur le fichier destiné à l'imprimeur il faut un noir
+   * pur, seule valeur qu'un RIP puisse convertir en 100 % de noir sans y
+   * mêler de cyan, de magenta ni de jaune.
+   */
   function renderBack(d, opts) {
     opts = opts || {};
     var g = GEO.verso, accent = d.accent || '#FF1900';
+    var noir = opts.print ? '#000000' : '#111111';
     var uid = 'c' + Math.random().toString(36).slice(2, 8);
     var bleed = opts.bleed ? BLEED : 0;
-    var out = [open({ bleed: opts.bleed, className: 'card-svg card-back',
+    var out = [open({ bleed: opts.bleed, marks: opts.marks, className: 'card-svg card-back',
                       label: 'Verso : coordonnées de ' + [d.firstName, d.lastName].join(' ') })];
 
     out.push(background(opts, '#FFFFFF'));
@@ -263,7 +284,7 @@
       out.push('<rect x="' + f(g.qr.x) + '" y="' + f(g.qr.y) + '" width="' + f(g.qr.size)
              + '" height="' + f(g.qr.size) + '" fill="#FFFFFF"/>');
       out.push('<g transform="translate(' + f(g.qr.x) + ' ' + f(g.qr.y) + ')">'
-             + '<path d="' + qr.path + '" fill="' + (d.qrColor || '#111111') + '"/></g>');
+             + '<path d="' + qr.path + '" fill="' + (d.qrColor || noir) + '"/></g>');
     } catch (err) {
       out.push(text('QR indisponible', { x: g.qr.x, y: g.qr.y + 5, size: 2.5, fill: '#999' }));
     }
@@ -280,7 +301,7 @@
       }
       out.push(text(line.text, {
         x: g.ident.x, y: line.baseline, size: line.size,
-        fill: line.kind === 'name' ? '#FFFFFF' : '#111111',
+        fill: line.kind === 'name' ? '#FFFFFF' : noir,
         weight: line.kind === 'department' ? 400 : (line.kind === 'name' ? 600 : 500),
         italic: line.kind === 'role',
         cls: line.kind === 'name' ? 'name-' + uid : 'ident-' + uid,
@@ -303,7 +324,7 @@
       var base = firstRow + i * g.rows.lead;
       out.push(icon(row[0], g.rows.iconX, base, g.rows.size, accent));
       out.push(text(row[1], { x: g.rows.textX, y: base, size: g.rows.size,
-                              fill: '#111111', weight: 500, cls: 'row-' + uid }));
+                              fill: noir, weight: 500, cls: 'row-' + uid }));
     });
 
     // Bloc adresse, aligné à droite. Son cache blanc et la place du
@@ -321,7 +342,7 @@
       out.push('<rect class="mask-addr-' + uid + '" x="0" y="0" width="0" height="0" fill="#FFFFFF"/>');
       addr.forEach(function (line, i) {
         var y = a.baseline + i * a.lead;
-        out.push(text(line.str, { x: a.right, y: y, size: a.size, fill: '#111111',
+        out.push(text(line.str, { x: a.right, y: y, size: a.size, fill: noir,
                                   weight: line.weight, anchor: 'end',
                                   cls: 'addr-' + uid,
                                   id: line.pin ? 'org-' + uid : null }));
@@ -336,7 +357,7 @@
              + '" stroke-width="' + f(a.ruleWidth) + '"/>');
     }
 
-    if (opts.marks) out.push(cropMarks(accent));
+    if (opts.marks) out.push(cropMarks());
     out.push('</svg>');
     return out.join('');
   }
@@ -478,24 +499,10 @@
   }
 
   /** Place l'épingle du recto à gauche de la raison sociale, une fois mesurée. */
-  function fitFront(svgEl) {
-    if (!svgEl) return;
-    var a = GEO.recto.address;
-    var org = svgEl.querySelector('[id^="forg-"]');
-    var pin = svgEl.querySelector('[id^="fpin-"] path');
-    if (!org || !pin) return;
-    var ow = 0;
-    try { ow = org.getComputedTextLength(); } catch (e) { return; }
-    var k = a.pinSize / Icons.UPEM;
-    pin.parentNode.setAttribute('transform',
-      'translate(' + f(a.right - ow - a.iconGap - Icons.glyphs.pin.box[2] * k) + ' '
-      + f(a.baseline + a.pinDrop) + ') scale(' + k.toFixed(6) + ' ' + (-k).toFixed(6) + ')');
-  }
+  /* Le recto ne porte plus de bloc mesuré : rien à réajuster après rendu. */
 
-  /** Pose le recto dans un élément du document, puis ajuste ce qui se mesure. */
   function frontInto(host, d, opts) {
     host.innerHTML = renderFront(d, opts || {});
-    fitFront(host.firstElementChild);
     return host.firstElementChild;
   }
 
@@ -517,8 +524,8 @@
   }
 
   global.Card = {
-    TRIM_W: TRIM_W, TRIM_H: TRIM_H, BLEED: BLEED,
+    TRIM_W: TRIM_W, TRIM_H: TRIM_H, BLEED: BLEED, pageSize: pageSize,
     front: renderFront, back: renderBack,
-    frontInto: frontInto, backInto: backInto, fitBand: fitBand, fitFront: fitFront
+    frontInto: frontInto, backInto: backInto, fitBand: fitBand
   };
 }(window));
