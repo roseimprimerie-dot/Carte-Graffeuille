@@ -1,0 +1,9 @@
+# Author est sous ITF Free Font License, dont la clause 02 interdit de
+# redistribuer la fonte et de la mettre à disposition de tiers. Ce dépôt étant
+# public, elle n'y entre pas : elle se dépose à la main dans assets/fonts/author/
+# sur les postes qui composent les cartes.
+assets/fonts/author/
+
+# Fichier généré à partir de ces mêmes fontes : il en contient le contenu en
+# base64, et n'a donc pas plus sa place ici qu'elles.
+assets/js/fontes.js

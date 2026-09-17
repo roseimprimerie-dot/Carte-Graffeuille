@@ -282,6 +282,15 @@ input[type="color"] {
 
 .exports { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 
+/* Variante d'alerte : un avertissement qui change la validité du fichier
+   d'impression ne doit pas se lire comme une note de bas de page. */
+.notice.alerte {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--accent) 8%, var(--panel));
+  border-color: var(--accent);
+  border-left-width: 3px;
+}
+
 .notice {
   margin: 12px 0 0;
   padding: 10px 12px;

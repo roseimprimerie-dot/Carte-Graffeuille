@@ -19,13 +19,15 @@ PAGE = RACINE / "editeur.html"
 texte = PAGE.read_text(encoding="utf-8")
 motif = re.compile(r'(?P<attr>(?:src|href)=")(?P<chemin>assets/[^"?]+)(?:\?v=[^"]*)?(?P<fin>")')
 
-vus = []
+vus, absents = [], []
 
 def estampille(m):
     chemin = m.group("chemin")
     fichier = RACINE / chemin
     if not fichier.exists():
-        raise SystemExit("fichier absent : " + chemin)
+        # fontes.js est hors du dépôt : on laisse l'adresse telle quelle.
+        absents.append(chemin)
+        return m.group("attr") + chemin + m.group("fin")
     h = hashlib.sha256(fichier.read_bytes()).hexdigest()[:8]
     vus.append((chemin, h))
     return m.group("attr") + chemin + "?v=" + h + m.group("fin")
@@ -36,4 +38,6 @@ if neuf != texte:
 
 for chemin, h in vus:
     print("  %-34s %s" % (chemin, h))
-print("%d fichiers estampillés%s" % (len(vus), "" if neuf != texte else " (inchangé)"))
+for chemin in absents:
+    print("  %-34s absent, laissé sans empreinte" % chemin)
+print("%d fichiers estampillés" % len(vus))

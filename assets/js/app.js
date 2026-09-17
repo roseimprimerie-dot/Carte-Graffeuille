@@ -146,6 +146,28 @@
     return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
+  /**
+   * Author ne fait pas partie du dépôt : sa licence en interdit la
+   * redistribution. Sans elle le navigateur compose dans une fonte de
+   * substitution, et comme la mise en page est relevée sur les largeurs réelles
+   * d'Author, la carte cesse d'être la carte. Mieux vaut le dire en grand que
+   * de laisser partir un fichier faux à l'impression.
+   */
+  function verifierFonte() {
+    var notice = $('#font-notice');
+    var chargee = Array.prototype.some.call(document.fonts || [], function (f) {
+      return f.family === 'Author' && f.status === 'loaded';
+    });
+    notice.hidden = chargee;
+    if (!chargee) {
+      notice.innerHTML = '<strong>Author est absente.</strong> La carte se compose '
+        + 'dans une fonte de substitution : les largeurs, les coupures de lignes et '
+        + 'la largeur du bandeau rouge sont fausses. N’imprimez pas ce fichier. '
+        + 'Déposez les cinq <code>.woff2</code> dans <code>assets/fonts/author/</code>, '
+        + 'puis relancez <code>python3 outils/inclure-fontes.py</code>.';
+    }
+  }
+
   function update() {
     state = normalise(readForm());
     render();
@@ -479,7 +501,9 @@
     }
 
     // Les fontes web décalent la largeur du bandeau : on recalcule au chargement.
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(render);
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(function () { render(); verifierFonte(); });
+    }
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
