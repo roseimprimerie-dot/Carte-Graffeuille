@@ -340,9 +340,8 @@
     var addr = [];
     if (d.company) addr.push({ str: d.company, weight: 700, pin: true });
     if (d.street) addr.push({ str: d.street, weight: 400 });
-    var cityLine = [d.postalCode, d.city].filter(Boolean).join(' ')
-                 + (d.country ? ' - ' + d.country : '');
-    if (cityLine.trim()) addr.push({ str: cityLine.trim(), weight: 400 });
+    var ville = Contact.cityLine(d);
+    if (ville) addr.push({ str: ville, weight: 400 });
     if (d.website) addr.push({ str: d.website, weight: 500 });
 
     if (addr.length) {
@@ -530,9 +529,5 @@
     return host.firstElementChild;
   }
 
-  global.Card = {
-    TRIM_W: TRIM_W, TRIM_H: TRIM_H, BLEED: BLEED, pageSize: pageSize,
-    front: renderFront, back: renderBack,
-    frontInto: frontInto, backInto: backInto, fitBand: fitBand
-  };
+  global.Card = { pageSize: pageSize, frontInto: frontInto, backInto: backInto };
 }(window));

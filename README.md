@@ -48,7 +48,7 @@ QR imprimé depuis un poste local porte donc la même adresse que depuis le
 site publié. Le champ « Adresse du site publié » ne sert qu'à viser un autre
 hébergement.
 
-**Ces pages ne vivent plus dans ce dépôt.** Le QR les désigne, à l'hébergement
+**Ces pages vivent dans un autre dépôt.** Le QR les désigne, à l'hébergement
 de les servir. Sans identifiant de personne, le QR bascule en mode autonome et
 porte les coordonnées dans l'URL elle-même, sans page à héberger.
 
@@ -64,35 +64,7 @@ porte les coordonnées dans l'URL elle-même, sans page à héberger.
 | `assets/js/fontes.js` | **Fichier généré** : les fontes de la carte en base64, incorporées au SVG exporté. Régénéré par `python3 outils/inclure-fontes.py`. |
 | `assets/js/icons.js` | Pictogrammes de la carte, tracés extraits de la fonte du fichier d'impression. |
 | `assets/js/logo.js` | Tracés du logotype, du symbole et de la signature. |
-| `assets/css/fonts.css` | Author (ITF Free Font License), Montserrat, Inter et Archivo (SIL OFL 1.1), servies par le site. |
-
-## Reprise dans le dépôt qui sert les pages
-
-Les pages visées par le QR vivent ailleurs. Ce dépôt-ci est l'atelier : une
-fois l'éditeur au point, il se recopie là-bas.
-
-```sh
-cp editeur.html   <depot-des-pages>/
-cp -r assets/     <depot-des-pages>/assets/
-cp -r outils/     <depot-des-pages>/outils/
-```
-
-`cp -r` fusionne : les fichiers propres aux pages publiques - `carte.js`,
-`carte.css`, les SVG de logo - restent en place, ils n'existent pas ici.
-`fonts.css` est volontairement un sur-ensemble : il déclare aussi Archivo,
-dont seules les pages publiques se servent, pour que l'écrasement ne leur
-retire rien.
-
-**Trois fichiers sont partagés avec la page publique** et l'écraser la touche :
-
-| Fichier | Ce que la page publique y prend |
-| --- | --- |
-| `contact.js` | `normalise`, `fullName`, `slugify`, `vcard`, `emails`, `e164`, `cityLine`, `addressQuery`, `websiteUrl`, `readFragment`, `DEFAULTS` |
-| `icons.js` | `Icons.inline` |
-| `logo.js` | `LOGO.mark`, `LOGO.wordmark`, `LOGO.tagline` |
-
-Tant qu'on n'enlève ni ne renomme rien de cette liste, la copie est sans
-risque. `app.js`, `card.js` et `qrcode.js` n'appartiennent qu'à l'éditeur.
+| `assets/css/fonts.css` | Author (ITF Free Font License) pour la carte, Inter (SIL OFL 1.1) pour l'interface. |
 
 ## Licence des fontes
 

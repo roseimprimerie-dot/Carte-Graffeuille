@@ -15,24 +15,24 @@ import textwrap
 
 RACINE = pathlib.Path(__file__).resolve().parent.parent
 
-# Uniquement les graisses que card.js emploie : le recto en Montserrat 600,
-# le verso en Author 400/500/600/700. L'italique et Inter n'y figurent pas.
+# Uniquement les faces que card.js emploie : Author 400/500/600/700, plus le
+# 500 italique de la fonction au verso. Inter, fonte de l'interface, n'y est pas.
 FACES = [
-    ("Montserrat", 600, "fonts/montserrat-600.woff2"),
-    ("Author", 400, "fonts/author/Author-Regular.woff2"),
-    ("Author", 500, "fonts/author/Author-Medium.woff2"),
-    ("Author", 600, "fonts/author/Author-Semibold.woff2"),
-    ("Author", 700, "fonts/author/Author-Bold.woff2"),
+    ("Author", "normal", 400, "fonts/author/Author-Regular.woff2"),
+    ("Author", "normal", 500, "fonts/author/Author-Medium.woff2"),
+    ("Author", "italic", 500, "fonts/author/Author-MediumItalic.woff2"),
+    ("Author", "normal", 600, "fonts/author/Author-Semibold.woff2"),
+    ("Author", "normal", 700, "fonts/author/Author-Bold.woff2"),
 ]
 
 blocs, total = [], 0
-for famille, graisse, chemin in FACES:
+for famille, style, graisse, chemin in FACES:
     brut = (RACINE / "assets" / chemin).read_bytes()
     total += len(brut)
     b64 = base64.b64encode(brut).decode("ascii")
     blocs.append(
-        "@font-face{font-family:'%s';font-style:normal;font-weight:%d;"
-        "src:url(data:font/woff2;base64,%s) format('woff2');}" % (famille, graisse, b64)
+        "@font-face{font-family:'%s';font-style:%s;font-weight:%d;"
+        "src:url(data:font/woff2;base64,%s) format('woff2');}" % (famille, style, graisse, b64)
     )
 
 css = "".join(blocs)
@@ -43,8 +43,7 @@ entete = textwrap.dedent('''\
      * FICHIER GÉNÉRÉ. Ne pas modifier à la main :
      *     python3 outils/inclure-fontes.py
      *
-     * %d faces, %.0f Ko de woff2. Author est sous ITF Free Font License,
-     * Montserrat sous SIL Open Font License 1.1.
+     * %d faces, %.0f Ko de woff2, sous ITF Free Font License.
      */
     window.CARD_FONTS_CSS = ''' % (len(FACES), total / 1024))
 

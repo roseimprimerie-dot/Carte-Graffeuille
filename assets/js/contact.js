@@ -75,9 +75,6 @@ window.Contact = (function () {
   }
 
   /** Adresse sur une ligne, pour un lien vers une application de cartographie. */
-  function addressQuery(d) {
-    return [d.street, d.postalCode, d.city, d.country].filter(Boolean).join(', ');
-  }
 
   /** Adresse du site, complétée du protocole si l'utilisateur l'a omis. */
   function websiteUrl(d) {
@@ -191,24 +188,9 @@ window.Contact = (function () {
     return d.slug ? root + 'equipe/' + d.slug + '/' : root + '#c=' + pack(d);
   }
 
-  /** Lit le fragment d'URL d'une page publique : identifiant ou coordonnées. */
-  function readFragment(hash) {
-    var frag = String(hash || '').replace(/^#/, '');
-    if (!frag) return { kind: 'default' };
-    if (frag.indexOf('c=') === 0) {
-      var d = unpack(frag.slice(2));
-      return d ? { kind: 'inline', data: d } : { kind: 'invalid' };
-    }
-    if (/^[a-z0-9-]{1,64}$/i.test(frag)) return { kind: 'slug', slug: frag };
-    return { kind: 'invalid' };
-  }
-
   return {
-    DEFAULTS: DEFAULTS, FIELDS: FIELDS, CHECKBOXES: CHECKBOXES,
+    SITE: SITE, DEFAULTS: DEFAULTS, FIELDS: FIELDS,
     normalise: normalise, fullName: fullName, slugify: slugify,
-    cityLine: cityLine, addressQuery: addressQuery, websiteUrl: websiteUrl,
-    vcard: vcard, emails: emails, e164: e164, telType: telType,
-    pack: pack, unpack: unpack,
-    SITE: SITE, cardUrl: cardUrl, readFragment: readFragment
+    cityLine: cityLine, emails: emails, vcard: vcard, cardUrl: cardUrl
   };
 }());

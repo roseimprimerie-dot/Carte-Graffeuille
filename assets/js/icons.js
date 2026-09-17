@@ -52,16 +52,5 @@ window.Icons = (function () {
   }
 
   /** Élément SVG autonome dimensionné en pixels, pour la page publique. */
-  function inline(name, size, cls) {
-    var b = GLYPHS[name].box;
-    var w = b[2] - b[0], h = b[3] - b[1], side = Math.max(w, h);
-    var ox = b[0] - (side - w) / 2, oy = -b[3] - (side - h) / 2;
-    return '<svg viewBox="' + ox + ' ' + oy + ' ' + side + ' ' + side + '"'
-         + ' width="' + size + '" height="' + size + '"'
-         + (cls ? ' class="' + cls + '"' : '')
-         + ' aria-hidden="true" focusable="false">'
-         + '<g transform="scale(1 -1)">' + paint(name, 'currentColor') + '</g></svg>';
-  }
-
-  return { UPEM: UPEM, glyphs: GLYPHS, group: group, inline: inline };
+  return { UPEM: UPEM, glyphs: GLYPHS, group: group };
 }());
