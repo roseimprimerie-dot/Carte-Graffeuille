@@ -155,9 +155,14 @@
    */
   function verifierFonte() {
     var notice = $('#font-notice');
-    var chargee = Array.prototype.some.call(document.fonts || [], function (f) {
-      return f.family === 'Author' && f.status === 'loaded';
-    });
+    // document.fonts est un FontFaceSet : il s'itère, mais n'a pas de length,
+    // donc les méthodes de Array ne s'y appliquent pas. Il a son propre forEach.
+    var chargee = false;
+    if (document.fonts && document.fonts.forEach) {
+      document.fonts.forEach(function (f) {
+        if (f.family.replace(/["']/g, '') === 'Author' && f.status === 'loaded') chargee = true;
+      });
+    }
     notice.hidden = chargee;
     if (!chargee) {
       notice.innerHTML = '<strong>Author est absente.</strong> La carte se compose '
